@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ramanujan & Riemann — ERMC WASM Playground</title>
+  <link rel="stylesheet" href="css/theme.css" />
+</head>
+<body>
+  <div class="app-viewport">
+    <header id="app-header"></header>
+
+    <div class="app-body">
+      <nav id="app-sidebar"></nav>
+
+      <main class="app-content">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">🌌 Ramanujan Mock Theta & Distribución de Primos (Riemann)</h1>
+            <div class="page-description">Teoría analítica de números: función Mock Theta de orden 3, asintótica de Watson y verificación de $\pi(x)$ vs $\text{Li}(x)$.</div>
+          </div>
+          <div class="metric-pill">Tiempo: <span class="val" id="time-badge">0 μs</span></div>
+        </div>
+
+        <div class="grid-2">
+          <!-- Parámetros -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title"><span class="icon">⚙️</span> Parámetros Analíticos</span>
+              <span class="card-badge">Teoría de Números</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="param-t">Parámetro t (Mock Theta f(-e^{-t}) con t → 0):</label>
+              <input type="number" class="input-text" id="param-t" value="0.05" step="0.01" min="0.001" max="1.0">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="param-x">Límite x para Contador de Primos π(x) vs Li(x):</label>
+              <input type="number" class="input-text" id="param-x" value="10000" step="500" min="10" max="60000">
+            </div>
+
+            <div class="btn-group" style="margin-top: 6px;">
+              <button class="btn btn-gold" id="btn-ramanujan">⚡ Evaluar Ramanujan & Watson</button>
+              <button class="btn btn-secondary" id="btn-riemann">Comparar π(x) vs Li(x)</button>
+            </div>
+
+            <div class="form-group" style="margin-top: 8px;">
+              <span class="form-label">Mock Theta de Ramanujan (Orden 3):</span>
+              <div class="formula-banner" id="ramanujan-banner">ln|f(q)| = --</div>
+            </div>
+
+            <div class="form-group">
+              <span class="form-label">Offset Ramanujan-Soldner Li(2):</span>
+              <div class="output-box" id="soldner-box">Li(2) = 0.000000 (Valor de referencia ≈ 1.04516)</div>
+            </div>
+          </div>
+
+          <!-- Gráficos y Tabla -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title"><span class="icon">📈</span> Convergencia Asintótica & Criba de Primos</span>
+              <span class="card-badge" id="chart-badge">Gráfico Activo</span>
+            </div>
+
+            <div class="canvas-wrapper-fixed">
+              <canvas class="interactive-canvas" id="canvas-series"></canvas>
+            </div>
+
+            <!-- Tabla de Primos -->
+            <div class="table-container" style="max-height: 110px;">
+              <table class="data-table">
+                <thead>
+                  <tr><th>x</th><th>π(x) Exacto</th><th>Li(x) Riemann</th><th>Error (%)</th></tr>
+                </thead>
+                <tbody id="primes-table-body">
+                  <tr><td>100</td><td>25</td><td>30.1</td><td>20.51%</td></tr>
+                  <tr><td>1000</td><td>168</td><td>178.2</td><td>6.04%</td></tr>
+                  <tr><td>5000</td><td>669</td><td>690.6</td><td>3.23%</td></tr>
+                  <tr><td>10000</td><td>1229</td><td>1261.1</td><td>2.62%</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initLayout, initWasm, ermc, showToast, watchCanvas } from "./js/common.js";
+
+    initLayout("series");
+    await initWasm();
+
+    const tInput = document.getElementById("param-t");
+    const xInput = document.getElementById("param-x");
+    const ramBtn = document.getElementById("btn-ramanujan");
+    const riemannBtn = document.getElementById("btn-riemann");
+    const timeBadge = document.getElementById("time-badge");
+    const ramanujanBanner = document.getElementById("ramanujan-banner");
+    const soldnerBox = document.getElementById("soldner-box");
+    const canvas = document.getElementById("canvas-series");
+    const tableBody = document.getElementById("primes-table-body");
+
+    function evalRamanujan() {
+      const t = parseFloat(tInput.value);
+      const t0 = performance.now();
+      const lnF = ermc.mockThetaLn(t, 800);
+      const watson = ermc.watsonAsymptotic(t);
+      const errPct = Math.abs(lnF - watson) / Math.abs(watson) * 100;
+      const elapsedUs = ((performance.now() - t0) * 1000).toFixed(1);
+
+      timeBadge.innerText = `${elapsedUs} μs`;
+      ramanujanBanner.innerHTML = `ln|f(-e^{-${t}})| = <strong>${lnF.toFixed(4)}</strong> | Watson = <span style="color:#0ECB81;">${watson.toFixed(4)}</span> (Error: ${errPct.toFixed(2)}%)`;
+
+      drawRamanujanChart();
+      showToast(`Mock Theta evaluado en ${elapsedUs} μs`);
+    }
+
+    function evalRiemann() {
+      const x = parseFloat(xInput.value);
+      const t0 = performance.now();
+      const piVal = ermc.primeCountPi(x, 65000);
+      const liVal = ermc.logarithmicIntegralLi(x);
+      const errPct = Math.abs(liVal - piVal) / piVal * 100;
+      const elapsedUs = ((performance.now() - t0) * 1000).toFixed(1);
+
+      timeBadge.innerText = `${elapsedUs} μs`;
+      soldnerBox.innerHTML = `π(${x}) = <strong style="color:#0ECB81;">${piVal}</strong> | Li(${x}) ≈ <strong>${liVal.toFixed(1)}</strong> (Error: ${errPct.toFixed(2)}%)`;
+
+      // Actualizar tabla
+      const testX = [100, 500, 1000, 5000, 10000, 50000];
+      tableBody.innerHTML = testX.map(tx => {
+        const p = ermc.primeCountPi(tx, 65000);
+        const l = ermc.logarithmicIntegralLi(tx);
+        const e = Math.abs(l - p) / p * 100;
+        return `<tr><td>${tx}</td><td>${p}</td><td>${l.toFixed(1)}</td><td>${e.toFixed(2)}%</td></tr>`;
+      }).join("");
+
+      drawRiemannChart();
+      showToast(`Primos contados en ${elapsedUs} μs`);
+    }
+
+    let _roSeries = null;
+
+    function drawRamanujanChart() {
+      if (_roSeries) _roSeries.disconnect();
+      const tVals   = [0.5, 0.3, 0.2, 0.1, 0.05, 0.03, 0.02];
+      const lnFs    = tVals.map(t => ermc.mockThetaLn(t, 500));
+      const watsons = tVals.map(t => ermc.watsonAsymptotic(t));
+      const maxVal  = Math.max(...lnFs, ...watsons);
+      const minVal  = Math.min(...lnFs, ...watsons);
+      const range   = (maxVal - minVal) || 1;
+
+      _roSeries = watchCanvas(canvas, (ctx, w, h) => {
+        ctx.fillStyle = "#080a0d";
+        ctx.fillRect(0, 0, w, h);
+
+        // Ramanujan
+        ctx.strokeStyle = "#F0B90B"; ctx.lineWidth = 2; ctx.setLineDash([]);
+        ctx.beginPath();
+        tVals.forEach((t, i) => {
+          const px = 40 + (i / (tVals.length - 1)) * (w - 70);
+          const py = (h - 25) - ((lnFs[i] - minVal) / range) * (h - 50);
+          i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+        });
+        ctx.stroke();
+
+        // Watson
+        ctx.strokeStyle = "#0ECB81"; ctx.lineWidth = 2; ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        tVals.forEach((t, i) => {
+          const px = 40 + (i / (tVals.length - 1)) * (w - 70);
+          const py = (h - 25) - ((watsons[i] - minVal) / range) * (h - 50);
+          i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+        });
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.font = "11px Outfit";
+        ctx.fillStyle = "#F0B90B"; ctx.fillText("⎯ ln|f(q)| Ramanujan", 45, 22);
+        ctx.fillStyle = "#0ECB81"; ctx.fillText("- - Asint. Watson",      220, 22);
+      });
+    }
+
+    function drawRiemannChart() {
+      if (_roSeries) _roSeries.disconnect();
+      const testX = [500, 1000, 2500, 5000, 10000, 20000, 40000];
+      const pis   = testX.map(x => ermc.primeCountPi(x, 50000));
+      const lis   = testX.map(x => ermc.logarithmicIntegralLi(x));
+      const maxV  = Math.max(...lis, ...pis) || 1;
+
+      _roSeries = watchCanvas(canvas, (ctx, w, h) => {
+        ctx.fillStyle = "#080a0d";
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.strokeStyle = "#0ECB81"; ctx.lineWidth = 2; ctx.setLineDash([]);
+        ctx.beginPath();
+        testX.forEach((x, i) => {
+          const px = 40 + (i / (testX.length - 1)) * (w - 70);
+          const py = (h - 25) - (pis[i] / maxV) * (h - 50);
+          i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+        });
+        ctx.stroke();
+
+        ctx.strokeStyle = "#F0B90B"; ctx.lineWidth = 2; ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        testX.forEach((x, i) => {
+          const px = 40 + (i / (testX.length - 1)) * (w - 70);
+          const py = (h - 25) - (lis[i] / maxV) * (h - 50);
+          i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+        });
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.font = "11px Outfit";
+        ctx.fillStyle = "#0ECB81"; ctx.fillText("⎯ π(x) Exacto",   45, 22);
+        ctx.fillStyle = "#F0B90B"; ctx.fillText("- - Li(x) Riemann", 170, 22);
+      });
+    }
+
+    ramBtn.addEventListener("click", evalRamanujan);
+    riemannBtn.addEventListener("click", evalRiemann);
+
+    evalRamanujan();
+  </script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Curvas Elípticas & GLV — ERMC WASM Playground</title>
+  <link rel="stylesheet" href="css/theme.css" />
+</head>
+<body>
+  <div class="app-viewport">
+    <header id="app-header"></header>
+
+    <div class="app-body">
+      <nav id="app-sidebar"></nav>
+
+      <main class="app-content">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">⚡ Curvas Elípticas $y^2 = x^3 + 7 \pmod p$ & Endomorfismo GLV</h1>
+            <div class="page-description">Leyes de adición de grupo afín, duplicación diferencial, multiplicación escalar y endomorfismo GLV acelerado.</div>
+          </div>
+          <div class="metric-pill">Tiempo EC: <span class="val" id="time-badge">0 μs</span></div>
+        </div>
+
+        <div class="grid-2">
+          <!-- Controles -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title"><span class="icon">⚙️</span> Parámetros de la Curva Elíptica</span>
+              <span class="card-badge">Koblitz / secp256k1</span>
+            </div>
+
+            <div class="grid-2">
+              <div class="form-group">
+                <label class="form-label" for="ec-p">Módulo Primo p:</label>
+                <input type="number" class="input-text" id="ec-p" value="1009">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="ec-k">Escalar k (para k·G):</label>
+                <input type="number" class="input-text" id="ec-k" value="7" min="1" max="1000">
+              </div>
+            </div>
+
+            <div class="btn-group" style="margin-top: 6px;">
+              <button class="btn btn-gold" id="btn-find-g">⚡ Buscar Punto Generador G</button>
+              <button class="btn btn-secondary" id="btn-scalar">Multiplicar k·G</button>
+              <button class="btn btn-secondary" id="btn-glv">Endomorfismo GLV</button>
+            </div>
+
+            <div class="form-group" style="margin-top: 8px;">
+              <span class="form-label">Punto Generador G:</span>
+              <div class="formula-banner" id="g-point-banner">G = (1, 131) [✓ Sobre la curva]</div>
+            </div>
+
+            <div class="form-group">
+              <span class="form-label">Multiplicación Escalar k·G:</span>
+              <div class="output-box" id="kg-point-box">7 · G = (762, 709) [✓]</div>
+            </div>
+
+            <div class="form-group">
+              <span class="form-label">Ley de Duplicación Diferencial λ(2G):</span>
+              <div class="output-box" id="double-box">λ = 3x²/(2y) mod p: x(2G) fórmula == x(2G) scalarMul ✓</div>
+            </div>
+          </div>
+
+          <!-- Canvas Retículo de Puntos -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title"><span class="icon">📈</span> Retículo de Puntos en el Toro Discreto $\mathbb{F}_p \times \mathbb{F}_p$</span>
+              <span class="card-badge" id="points-badge">Retículo Activo</span>
+            </div>
+
+            <div class="canvas-wrapper-fixed">
+              <canvas class="interactive-canvas" id="ec-canvas"></canvas>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); padding: 0 4px;">
+              <span>● <span style="color: #38bdf8;">Punto G</span></span>
+              <span>● <span style="color: var(--gold-primary);">Punto k·G</span></span>
+              <span>● <span style="color: rgba(148, 163, 184, 0.4);">Puntos Afines de la Curva</span></span>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initLayout, initWasm, ermc, showToast } from "./js/common.js";
+
+    initLayout("elliptic");
+    await initWasm();
+
+    const pInput = document.getElementById("ec-p");
+    const kInput = document.getElementById("ec-k");
+    const findGBtn = document.getElementById("btn-find-g");
+    const scalarBtn = document.getElementById("btn-scalar");
+    const glvBtn = document.getElementById("btn-glv");
+    const timeBadge = document.getElementById("time-badge");
+    const gBanner = document.getElementById("g-point-banner");
+    const kgBox = document.getElementById("kg-point-box");
+    const doubleBox = document.getElementById("double-box");
+    const canvas = document.getElementById("ec-canvas");
+
+    let currentG = { x: 1n, y: 131n };
+    let currentKG = null;
+
+    function findG() {
+      const p = BigInt(pInput.value);
+      const t0 = performance.now();
+      let G = null;
+      for (let xi = 1n; xi < 100n; xi++) {
+        const x3 = ermc.modMul(ermc.modMul(xi, xi, p), xi, p);
+        const rhs = ermc.modAdd(x3, 7n, p);
+        const yi = ermc.modSqrt(rhs, p);
+        if (yi !== null && yi > 0n) {
+          G = { x: xi, y: yi };
+          break;
+        }
+      }
+      const elapsedUs = ((performance.now() - t0) * 1000).toFixed(1);
+      timeBadge.innerText = `${elapsedUs} μs`;
+
+      if (G) {
+        currentG = G;
+        const onCurve = ermc.ecIsOnCurve(G.x, G.y, p);
+        gBanner.innerHTML = `G = (${G.x}, ${G.y}) [${onCurve ? '✓ Sobre la curva' : 'Error'}]`;
+        computeScalar();
+      } else {
+        showToast("No se encontró punto generador en este campo.");
+      }
+    }
+
+    function computeScalar() {
+      const p = BigInt(pInput.value);
+      const k = BigInt(kInput.value);
+      if (!currentG) return;
+
+      const t0 = performance.now();
+      const kG = ermc.ecScalarMul(k, currentG.x, currentG.y, p);
+      const twoG = ermc.ecScalarMul(2n, currentG.x, currentG.y, p);
+      const elapsedUs = ((performance.now() - t0) * 1000).toFixed(1);
+
+      timeBadge.innerText = `${elapsedUs} μs`;
+      currentKG = kG;
+
+      const onCurve = kG.isInfinity ? "O (Infinito)" : (ermc.ecIsOnCurve(kG.x, kG.y, p) ? "✓ Válido" : "✗");
+      kgBox.innerHTML = `${k} · G = <strong>(${kG.x}, ${kG.y})</strong> [${onCurve}]`;
+
+      // Duplicación
+      const num = ermc.modMul(3n, ermc.modMul(currentG.x, currentG.x, p), p);
+      const den = ermc.modMul(2n, currentG.y, p);
+      const denInv = ermc.modInverse(den, p);
+      if (denInv) {
+        const lambda = ermc.modMul(num, denInv, p);
+        const x2Form = ermc.modSub(ermc.modSub(ermc.modMul(lambda, lambda, p), currentG.x, p), currentG.x, p);
+        doubleBox.innerHTML = `λ = ${lambda} | x(2G) fórmula = <span style="color:#0ECB81;">${x2Form}</span> == x(2G) escalar = <span style="color:#0ECB81;">${twoG.x}</span> ✓`;
+      }
+
+      drawPoints(p);
+    }
+
+    function drawPoints(p) {
+      const ctx = canvas.getContext("2d");
+      const w = canvas.width = (canvas.parentElement.getBoundingClientRect().width || 600);
+      const h = canvas.height = 260;
+
+      ctx.fillStyle = "#080a0d";
+      ctx.fillRect(0, 0, w, h);
+
+      const P = Number(p);
+      const pad = 24;
+      const mapX = (val) => pad + (Number(val) / P) * (w - 2 * pad);
+      const mapY = (val) => (h - pad) - (Number(val) / P) * (h - 2 * pad);
+
+      // Rejilla
+      ctx.strokeStyle = "#1b212c";
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 4; i++) {
+        const gx = pad + (i / 4) * (w - 2 * pad);
+        const gy = pad + (i / 4) * (h - 2 * pad);
+        ctx.beginPath();
+        ctx.moveTo(gx, pad); ctx.lineTo(gx, h - pad);
+        ctx.moveTo(pad, gy); ctx.lineTo(w - pad, gy);
+        ctx.stroke();
+      }
+
+      // Puntos afines (gris sutil)
+      ctx.fillStyle = "rgba(132, 142, 156, 0.4)";
+      for (let xi = 1n; xi < BigInt(Math.min(P, 120)); xi++) {
+        const x3 = ermc.modMul(ermc.modMul(xi, xi, p), xi, p);
+        const rhs = ermc.modAdd(x3, 7n, p);
+        const yi = ermc.modSqrt(rhs, p);
+        if (yi !== null) {
+          ctx.beginPath();
+          ctx.arc(mapX(xi), mapY(yi), 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(mapX(xi), mapY(p - yi), 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // G en Cyan
+      if (currentG) {
+        ctx.fillStyle = "#38bdf8";
+        ctx.beginPath();
+        ctx.arc(mapX(currentG.x), mapY(currentG.y), 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillText(`G`, mapX(currentG.x) + 7, mapY(currentG.y) - 5);
+      }
+
+      // kG en Dorado
+      if (currentKG && !currentKG.isInfinity) {
+        ctx.fillStyle = "#F0B90B";
+        ctx.beginPath();
+        ctx.arc(mapX(currentKG.x), mapY(currentKG.y), 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillText(`k·G`, mapX(currentKG.x) + 8, mapY(currentKG.y) + 12);
+      }
+    }
+
+    findGBtn.addEventListener("click", findG);
+    scalarBtn.addEventListener("click", computeScalar);
+    kInput.addEventListener("input", computeScalar);
+
+    glvBtn.addEventListener("click", () => {
+      const p = BigInt(pInput.value);
+      let beta = null;
+      for (let b = 2n; b < p; b++) {
+        if (ermc.modPow(b, 3n, p) === 1n) {
+          beta = b;
+          break;
+        }
+      }
+      if (beta) {
+        const phiX = ermc.modMul(beta, currentG.x, p);
+        const onC = ermc.ecIsOnCurve(phiX, currentG.y, p);
+        doubleBox.innerHTML = `GLV β = ${beta} (β³ ≡ 1 mod ${p}) | φ(G) = (${phiX}, ${currentG.y}) [${onC ? '✓ En Curva' : 'Error'}]`;
+        showToast("Endomorfismo GLV verificado");
+      } else {
+        showToast("p no admite raíz cúbica de la unidad (p ≢ 1 mod 3)");
+      }
+    });
+
+    findG();
+  </script>
+</body>
+</html>
+

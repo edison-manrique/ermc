@@ -1,0 +1,162 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Outliers & Precisión — ERMC WASM Playground</title>
+  <link rel="stylesheet" href="css/theme.css" />
+</head>
+<body>
+  <div class="app-viewport">
+    <header id="app-header"></header>
+
+    <div class="app-body">
+      <nav id="app-sidebar"></nav>
+
+      <main class="app-content">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">🛡️ Filtro Hampel Inmune a Outliers ($10^{100}$) & Aritmética Neumaier</h1>
+            <div class="page-description">Detección robusta con MAD normalizado inmune a overflow cósmico y sumas compensadas con precisión intacta a 64 bits.</div>
+          </div>
+          <div class="metric-pill">Inmunidad: <span class="val">±10¹⁰⁰</span></div>
+        </div>
+
+        <div class="grid-2">
+          <!-- Entrada y Filtro -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title"><span class="icon">⚙️</span> Muestras con Perturbaciones Extremas</span>
+              <span class="card-badge">MAD Normalizado</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="data-input">Datos con Outliers Astronómicos:</label>
+              <textarea class="textarea-custom" id="data-input">2.71, 2.73, 1e100, 2.70, 2.72, -1e100, 2.69, 2.74, 2.71, 2.72</textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="k-input">Umbral k de Hampel (múltiplos de MAD):</label>
+              <input type="number" class="input-text" id="k-input" value="3.0" step="0.5" min="1.0" max="6.0">
+            </div>
+
+            <button class="btn btn-gold btn-block" id="btn-filter" style="margin-top: 4px;">
+              ⚡ Filtrar Outliers y Compensar en WASM
+            </button>
+
+            <!-- Test Neumaier de Cancelación -->
+            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-color);">
+              <div class="form-label">Experimento Neumaier: [1e16, 1.0, -1e16]:</div>
+              <div class="output-box" id="neumaier-test-box" style="margin-top: 4px;">
+                Suma Estándar JS: 0 | Suma Neumaier Zig: 1.0 ✓
+              </div>
+            </div>
+          </div>
+
+          <!-- Gráfico y Diagnóstico -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title"><span class="icon">📊</span> Aislamiento de Anomalías</span>
+              <span class="card-badge" id="outliers-count-badge">0 outliers</span>
+            </div>
+
+            <div class="canvas-wrapper-fixed">
+              <canvas class="interactive-canvas" id="canvas-hampel"></canvas>
+            </div>
+
+            <div class="form-group">
+              <span class="form-label">Comparativa de Estimación:</span>
+              <div class="formula-banner" id="stats-banner">Media Clásica vs Mediana Robusta</div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initLayout, initWasm, ermc, showToast } from "./js/common.js";
+
+    initLayout("outliers");
+    await initWasm();
+
+    const dataInput = document.getElementById("data-input");
+    const kInput = document.getElementById("k-input");
+    const filterBtn = document.getElementById("btn-filter");
+    const countBadge = document.getElementById("outliers-count-badge");
+    const statsBanner = document.getElementById("stats-banner");
+    const neumaierBox = document.getElementById("neumaier-test-box");
+    const canvas = document.getElementById("canvas-hampel");
+
+    function runHampel() {
+      const data = dataInput.value.split(",").map(s => parseFloat(s.trim()));
+      const k = parseFloat(kInput.value);
+
+      const { nOutliers, mask, clean } = ermc.hampel(data, k);
+      const neumaier = ermc.neumaierSum(clean);
+
+      countBadge.innerText = `${nOutliers} detectados`;
+
+      let naiveSum = 0;
+      for (const d of data) naiveSum += d;
+      const naiveMean = naiveSum / data.length;
+
+      statsBanner.innerHTML = `
+        Media Ingenua: <span style="color:#F6465D;">${naiveMean.toExponential(2)} (Desbordada)</span><br>
+        Suma Compensada Neumaier: <span style="color:#0ECB81; font-weight:700;">${neumaier.toFixed(6)} (Exacta)</span>
+      `;
+
+      // Test de cancelación
+      const testCanc = [1e16, 1.0, -1e16];
+      let sumJS = 0;
+      for (const v of testCanc) sumJS += v;
+      const sumNeu = ermc.neumaierSum(testCanc);
+      neumaierBox.innerHTML = `Datos [1e16, 1.0, -1e16] → Suma JS (cancela): <span style="color:#F6465D;">${sumJS}</span> | Neumaier ERMC: <span style="color:#0ECB81; font-weight:700;">${sumNeu.toFixed(1)} ✓</span>`;
+
+      drawHampel(data, mask, clean);
+      showToast(`${nOutliers} outliers aislados con éxito`);
+    }
+
+    function drawHampel(data, mask, clean) {
+      const ctx = canvas.getContext("2d");
+      const w = canvas.width = (canvas.parentElement.getBoundingClientRect().width || 600);
+      const h = canvas.height = 260;
+
+      ctx.fillStyle = "#080a0d";
+      ctx.fillRect(0, 0, w, h);
+
+      const cleanVals = clean.filter((_, i) => !mask[i]);
+      const minV = Math.min(...cleanVals);
+      const maxV = Math.max(...cleanVals);
+      const range = (maxV - minV) || 1;
+
+      data.forEach((val, i) => {
+        const px = 40 + (i / (data.length - 1)) * (w - 70);
+        if (mask[i]) {
+          ctx.fillStyle = "#F6465D";
+          ctx.beginPath();
+          ctx.arc(px, 35, 6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillText(`±10¹⁰⁰`, px - 12, 22);
+        } else {
+          const py = (h - 35) - ((val - minV) / range) * (h - 80);
+          ctx.fillStyle = "#0ECB81";
+          ctx.beginPath();
+          ctx.arc(px, py, 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      ctx.fillStyle = "#0ECB81";
+      ctx.font = "11px Outfit";
+      ctx.fillText("● Muestras Limpias", 45, h - 12);
+      ctx.fillStyle = "#F6465D";
+      ctx.fillText("● Outliers Aislados (Sin Overflow)", 180, h - 12);
+    }
+
+    filterBtn.addEventListener("click", runHampel);
+    runHampel();
+  </script>
+</body>
+</html>
+

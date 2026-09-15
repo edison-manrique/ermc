@@ -7,7 +7,9 @@ const std = @import("std");
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
-    const optimize = b.standardOptimizeOption(.{});
+    // Usar ReleaseFast por defecto para bibliotecas nativas (.dll/.so).
+    // Se puede sobreescribir con: zig build -Doptimize=Debug
+    const optimize = b.standardOptimizeOption(.{ .preferred_optimize_mode = .ReleaseFast });
 
     // Módulo principal reutilizable de la librería (solo src/root.zig)
     const mod = b.addModule("ermc", .{

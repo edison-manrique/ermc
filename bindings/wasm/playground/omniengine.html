@@ -1,0 +1,286 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OmniEngine (SciML) — ERMC WASM Playground</title>
+  <link rel="stylesheet" href="css/theme.css" />
+</head>
+<body>
+  <div class="app-viewport">
+    <header id="app-header"></header>
+
+    <div class="app-body">
+      <nav id="app-sidebar"></nav>
+
+      <main class="app-content">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">🔬 OmniEngine — Descubrimiento Simbólico de Leyes Físicas</h1>
+            <div class="page-description">Identificación de ecuaciones no lineales a partir de datos mediante SINDy / STLSQ con snapping racional.</div>
+          </div>
+          <div class="metric-pill">Tiempo de Cómputo: <span class="val" id="time-badge">0 μs</span></div>
+        </div>
+
+        <div class="grid-2">
+          <!-- Configuración -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title"><span class="icon">⚙️</span> Configuración del Sistema Físico</span>
+              <span class="card-badge">SciML STLSQ</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="preset-select">Experimento Teórico / Sistema Dinámico:</label>
+              <select class="select-custom" id="preset-select">
+                <option value="pendulum">Péndulo No Lineal con Arrastre Cuadrático: f(θ, ω) = -9.81·sin(x₀) - 0.5·x₁²</option>
+                <option value="snell">Óptica / Ley de Snell (Fracción 4/3): f(θ) = (4/3)·sin(x₀)</option>
+                <option value="adiabatic">Termodinámica / Gas Monoatómico (Gamma 5/3): P(T, 1/V) = (5/3)·x₀·x₁</option>
+                <option value="torricelli">Hidrodinámica / Ley de Torricelli: v(h) = 4.4287·sqrt(x₀)</option>
+                <option value="hooke">Oscilador Armónico Amortiguado: f(x, v) = -10·x₀ - 0.3·x₁</option>
+              </select>
+            </div>
+
+            <div class="grid-2">
+              <div class="form-group">
+                <label class="form-label" for="samples-input">Número de Muestras (N):</label>
+                <input type="number" class="input-text" id="samples-input" value="100" min="20" max="800">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="noise-input">Ruido Gaussiano (σ):</label>
+                <input type="number" class="input-text" id="noise-input" value="0.00" step="0.01" min="0" max="0.5">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="lambda-input">Umbral de Esparsidad λ (STLSQ):</label>
+              <input type="number" class="input-text" id="lambda-input" value="0.05" step="0.01" min="0.001" max="1.0">
+            </div>
+
+            <button class="btn btn-gold btn-block" id="btn-fit" style="margin-top: 4px;">
+              ⚡ Descubrir Ley Física en WebAssembly
+            </button>
+
+            <!-- Test rápido de evaluación -->
+            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-color);">
+              <div class="form-label" style="margin-bottom: 4px;">Evaluar Modelo Descubierto en Punto de Test:</div>
+              <div class="grid-2">
+                <input type="text" class="input-text" id="test-input" value="0.5, 1.2" placeholder="x0, x1">
+                <button class="btn btn-secondary" id="btn-predict">Predecir f(X)</button>
+              </div>
+              <div class="output-box" id="predict-output" style="margin-top: 6px;">Predicción: --</div>
+            </div>
+          </div>
+
+          <!-- Resultados y Visualizador -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title"><span class="icon">📈</span> Ecuación Descubierta y Regresión</span>
+              <span class="card-badge" id="terms-badge">0 términos</span>
+            </div>
+
+            <div class="form-group">
+              <span class="form-label">Ley Teórica Esperada:</span>
+              <div class="output-box" id="true-formula-box" style="color: var(--text-muted);">--</div>
+            </div>
+
+            <div class="form-group">
+              <span class="form-label">Ecuación Simbólica Descubierta (Snapping Racional):</span>
+              <div class="formula-banner" id="discovered-formula">Presiona "Descubrir Ley Física"</div>
+            </div>
+
+            <div class="canvas-wrapper-fixed">
+              <canvas class="interactive-canvas" id="canvas-fit"></canvas>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initLayout, initWasm, ermc, showToast } from "./js/common.js";
+
+    initLayout("omniengine");
+    await initWasm();
+
+    const fitBtn = document.getElementById("btn-fit");
+    const predictBtn = document.getElementById("btn-predict");
+    const presetSelect = document.getElementById("preset-select");
+    const samplesInput = document.getElementById("samples-input");
+    const noiseInput = document.getElementById("noise-input");
+    const lambdaInput = document.getElementById("lambda-input");
+    const testInput = document.getElementById("test-input");
+    const predictOutput = document.getElementById("predict-output");
+    const trueBox = document.getElementById("true-formula-box");
+    const discBox = document.getElementById("discovered-formula");
+    const timeBadge = document.getElementById("time-badge");
+    const termsBadge = document.getElementById("terms-badge");
+    const canvas = document.getElementById("canvas-fit");
+
+    let currentEngine = null;
+    let currentWeights = [];
+    let currentNVars = 1;
+
+    function runFit() {
+      const preset = presetSelect.value;
+      const nSamples = parseInt(samplesInput.value, 10);
+      const noise = parseFloat(noiseInput.value);
+      const lambda = parseFloat(lambdaInput.value);
+
+      let nVars = 1;
+      let activations = [0, 5]; // Identity, Poly
+      let X_flat = [];
+      let y = [];
+      let trueFormula = "";
+
+      const gaussian = () => (Math.random() + Math.random() - 1) * noise * 2;
+
+      if (preset === "pendulum") {
+        nVars = 2;
+        activations = [0, 1, 5]; // Identity, Sine, Poly
+        trueFormula = "-9.8100*sin(x0) - 0.5000*x1^2";
+        testInput.value = "0.785, 1.5";
+        for (let i = 0; i < nSamples; i++) {
+          const th = (Math.random() - 0.5) * 2.0;
+          const w = (Math.random() - 0.5) * 4.0;
+          X_flat.push(th, w);
+          y.push(-9.81 * Math.sin(th) - 0.5 * w * w + gaussian());
+        }
+      } else if (preset === "snell") {
+        nVars = 1;
+        activations = [0, 1]; // Identity, Sine
+        trueFormula = "(4/3)*sin(x0)  [n1·sin(θ) = 1.3333·sin(θ)]";
+        testInput.value = "0.523";
+        for (let i = 0; i < nSamples; i++) {
+          const th = Math.random() * 1.2;
+          X_flat.push(th);
+          y.push((4.0 / 3.0) * Math.sin(th) + gaussian());
+        }
+      } else if (preset === "adiabatic") {
+        nVars = 2;
+        activations = [0, 5];
+        trueFormula = "(5/3)*x0*x1  [Gamma = 1.6667]";
+        testInput.value = "2.0, 1.5";
+        for (let i = 0; i < nSamples; i++) {
+          const T = 1.0 + Math.random() * 4.0;
+          const invV = 0.5 + Math.random() * 2.0;
+          X_flat.push(T, invV);
+          y.push((5.0 / 3.0) * T * invV + gaussian());
+        }
+      } else if (preset === "torricelli") {
+        nVars = 1;
+        activations = [0, 4]; // Identity, Sqrt
+        trueFormula = "4.4287*sqrt(x0)  [v = √(2gh)]";
+        testInput.value = "2.5";
+        for (let i = 0; i < nSamples; i++) {
+          const h = 0.2 + Math.random() * 4.8;
+          X_flat.push(h);
+          y.push(Math.sqrt(2 * 9.80665 * h) + gaussian());
+        }
+      } else if (preset === "hooke") {
+        nVars = 2;
+        activations = [0];
+        trueFormula = "-10.0000*x0 - 0.3000*x1";
+        testInput.value = "1.0, 2.0";
+        for (let i = 0; i < nSamples; i++) {
+          const x = (Math.random() - 0.5) * 2.0;
+          const v = (Math.random() - 0.5) * 4.0;
+          X_flat.push(x, v);
+          y.push(-10.0 * x - 0.3 * v + gaussian());
+        }
+      }
+
+      currentNVars = nVars;
+      if (currentEngine) ermc.destroyEngine(currentEngine);
+
+      const t0 = performance.now();
+      currentEngine = ermc.createEngine(nVars);
+      ermc.buildDictionary(currentEngine, activations);
+      const { ok, weights } = ermc.fit(currentEngine, X_flat, y, lambda);
+      const formula = ermc.getFormula(currentEngine, weights);
+      const elapsedUs = ((performance.now() - t0) * 1000).toFixed(1);
+
+      currentWeights = weights;
+      timeBadge.innerText = `${elapsedUs} μs`;
+      termsBadge.innerText = `${weights.filter(w => Math.abs(w) > 1e-4).length} activos`;
+      trueBox.innerText = trueFormula;
+      discBox.innerText = formula;
+
+      drawPlot(X_flat, y, nVars);
+      showToast(`Ley descubierta en ${elapsedUs} μs`);
+    }
+
+    function drawPlot(X_flat, y, nVars) {
+      const ctx = canvas.getContext("2d");
+      const w = canvas.width = (canvas.parentElement.getBoundingClientRect().width || 600);
+      const h = canvas.height = 260;
+
+      ctx.fillStyle = "#0B0E11";
+      ctx.fillRect(0, 0, w, h);
+
+      const minY = Math.min(...y);
+      const maxY = Math.max(...y);
+      const rangeY = (maxY - minY) || 1;
+
+      // Ejes
+      ctx.strokeStyle = "#242C3B";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(35, 20); ctx.lineTo(35, h - 25); ctx.lineTo(w - 20, h - 25);
+      ctx.stroke();
+
+      // Puntos reales (dorados)
+      ctx.fillStyle = "rgba(240, 185, 11, 0.75)";
+      for (let i = 0; i < y.length; i++) {
+        const px = 35 + (i / (y.length - 1)) * (w - 60);
+        const py = (h - 25) - ((y[i] - minY) / rangeY) * (h - 50);
+        ctx.beginPath();
+        ctx.arc(px, py, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Curva descubierta (verde esmeralda)
+      ctx.strokeStyle = "#0ECB81";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i < y.length; i++) {
+        const inVec = [];
+        for (let v = 0; v < nVars; v++) inVec.push(X_flat[i * nVars + v]);
+        const pred = ermc.predict(currentEngine, inVec, currentWeights);
+        const px = 35 + (i / (y.length - 1)) * (w - 60);
+        const py = (h - 25) - ((pred - minY) / rangeY) * (h - 50);
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+
+      ctx.fillStyle = "rgba(240, 185, 11, 0.9)";
+      ctx.font = "10px Outfit";
+      ctx.fillText("● Muestras Reales", w - 210, 22);
+      ctx.fillStyle = "#0ECB81";
+      ctx.fillText("― Modelo Simbólico Descubierto", w - 210, 36);
+    }
+
+    fitBtn.addEventListener("click", runFit);
+    presetSelect.addEventListener("change", runFit);
+
+    predictBtn.addEventListener("click", () => {
+      if (!currentEngine || currentWeights.length === 0) {
+        showToast("Primero ejecuta el ajuste del modelo");
+        return;
+      }
+      const vals = testInput.value.split(",").map(s => parseFloat(s.trim()));
+      if (vals.length < currentNVars) {
+        showToast(`Se requieren ${currentNVars} valores separados por comas`);
+        return;
+      }
+      const pred = ermc.predict(currentEngine, vals.slice(0, currentNVars), currentWeights);
+      predictOutput.innerHTML = `f([${vals.slice(0, currentNVars).join(", ")}]) = <span style="color: #0ECB81; font-weight: 700;">${pred.toFixed(5)}</span>`;
+    });
+
+    runFit();
+  </script>
+</body>
+</html>
+

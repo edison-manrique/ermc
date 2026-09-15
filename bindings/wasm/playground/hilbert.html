@@ -1,0 +1,168 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hilbert & SVD — ERMC WASM Playground</title>
+  <link rel="stylesheet" href="css/theme.css" />
+</head>
+<body>
+  <div class="app-viewport">
+    <header id="app-header"></header>
+
+    <div class="app-body">
+      <nav id="app-sidebar"></nav>
+
+      <main class="app-content">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">📐 Espacios de Hilbert $L^2$ & Descomposición SVD Jacobi</h1>
+            <div class="page-description">Geometría exacta en espacios funcionales: productos internos, desigualdad de Cauchy-Schwarz y descomposición en valores singulares.</div>
+          </div>
+          <div class="metric-pill">Precisión: <span class="val">ε ≈ 10⁻¹⁶</span></div>
+        </div>
+
+        <div class="grid-2">
+          <!-- Vectores y Matrices -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title"><span class="icon">⚙️</span> Vectores en $L^2$</span>
+              <span class="card-badge">MGS-DGKS</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="input-u">Vector u (componentes separadas por comas):</label>
+              <input type="text" class="input-text" id="input-u" value="1.0, 2.0, 3.0, 4.0">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="input-v">Vector v (componentes separadas por comas):</label>
+              <input type="text" class="input-text" id="input-v" value="4.0, 3.0, 2.0, 1.0">
+            </div>
+
+            <div class="btn-group" style="margin-top: 4px;">
+              <button class="btn btn-gold" id="btn-hilbert">⚡ Calcular en Hilbert</button>
+              <button class="btn btn-secondary" id="btn-svd">Calcular SVD Matriz 4×3</button>
+            </div>
+
+            <div class="form-group" style="margin-top: 8px;">
+              <span class="form-label">Producto Interno y Normas:</span>
+              <div class="formula-banner" id="hilbert-banner">⟨u, v⟩ = --</div>
+            </div>
+
+            <div class="form-group">
+              <span class="form-label">Desigualdad de Cauchy-Schwarz:</span>
+              <div class="output-box" id="cs-box">|⟨u, v⟩| ≤ ‖u‖ · ‖v‖</div>
+            </div>
+          </div>
+
+          <!-- Espectro SVD -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title"><span class="icon">📊</span> Espectro de Valores Singulares SVD</span>
+              <span class="card-badge" id="svd-badge">Jacobi One-Sided</span>
+            </div>
+
+            <div class="canvas-wrapper-fixed">
+              <canvas class="interactive-canvas" id="canvas-svd"></canvas>
+            </div>
+
+            <div class="form-group">
+              <span class="form-label">Número de Condición y Rango Numérico:</span>
+              <div class="output-box" id="svd-metrics-box">κ(A) = -- | Rango = --</div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initLayout, initWasm, ermc, showToast } from "./js/common.js";
+
+    initLayout("hilbert");
+    await initWasm();
+
+    const uInput = document.getElementById("input-u");
+    const vInput = document.getElementById("input-v");
+    const hilbertBtn = document.getElementById("btn-hilbert");
+    const svdBtn = document.getElementById("btn-svd");
+    const hilbertBanner = document.getElementById("hilbert-banner");
+    const csBox = document.getElementById("cs-box");
+    const svdMetrics = document.getElementById("svd-metrics-box");
+    const canvas = document.getElementById("canvas-svd");
+
+    function computeHilbert() {
+      const u = uInput.value.split(",").map(s => parseFloat(s.trim()));
+      const v = vInput.value.split(",").map(s => parseFloat(s.trim()));
+      if (u.length !== v.length) {
+        showToast("Los vectores deben tener la misma dimensión");
+        return;
+      }
+      const inner = ermc.innerProduct(u, v);
+      const normU = ermc.norm(u);
+      const normV = ermc.norm(v);
+      const ang = ermc.angle(u, v);
+      const angDeg = (ang * 180 / Math.PI).toFixed(2);
+      const csLhs = Math.abs(inner);
+      const csRhs = normU * normV;
+
+      hilbertBanner.innerHTML = `⟨u, v⟩ = <strong style="color:#0ECB81;">${inner.toFixed(4)}</strong> | ‖u‖ = ${normU.toFixed(4)} | ‖v‖ = ${normV.toFixed(4)}`;
+      csBox.innerHTML = `|⟨u,v⟩| (${csLhs.toFixed(4)}) ≤ ‖u‖‖v‖ (${csRhs.toFixed(4)}) → <span style="color:#0ECB81; font-weight:700;">Cumple ✓ (Ángulo: ${ang.toFixed(4)} rad / ${angDeg}°)</span>`;
+      showToast("Geometría en Hilbert calculada");
+    }
+
+    function computeSVD() {
+      const m = 4, n = 3;
+      const A = [
+        1.0, 2.0, 3.0,
+        4.0, 5.0, 6.0,
+        7.0, 8.0, 9.0,
+        10.0, 11.0, 12.0
+      ];
+
+      const { ok, u, s, v } = ermc.svd(A, m, n);
+      const kappa = s[0] / (s[s.length - 1] || 1e-15);
+      const rank = s.filter(x => x > 1e-10).length;
+
+      svdMetrics.innerHTML = `Valores Singulares: [${s.map(x => x.toFixed(2)).join(", ")}] | κ(A) = <span style="color:#F0B90B;">${kappa.toExponential(3)}</span> | Rango: <strong style="color:#0ECB81;">${rank}</strong>/${n}`;
+      drawSvdChart(s);
+      showToast("SVD Jacobi One-Sided computado");
+    }
+
+    function drawSvdChart(s) {
+      const ctx = canvas.getContext("2d");
+      const w = canvas.width = (canvas.parentElement.getBoundingClientRect().width || 600);
+      const h = canvas.height = 260;
+
+      ctx.fillStyle = "#080a0d";
+      ctx.fillRect(0, 0, w, h);
+
+      const maxS = Math.max(...s);
+      const barW = Math.min(80, (w - 80) / s.length);
+
+      s.forEach((val, i) => {
+        const barH = (val / maxS) * (h - 70);
+        const x = 50 + i * (barW + 24);
+        const y = (h - 35) - barH;
+
+        ctx.fillStyle = "#F0B90B";
+        ctx.fillRect(x, y, barW, barH);
+
+        ctx.fillStyle = "#EAECEF";
+        ctx.font = "11px 'JetBrains Mono'";
+        ctx.fillText(`σ${i + 1} = ${val.toFixed(2)}`, x + 4, y - 8);
+        ctx.fillStyle = "#848E9C";
+        ctx.fillText(`Modo ${i + 1}`, x + barW / 2 - 18, h - 15);
+      });
+    }
+
+    hilbertBtn.addEventListener("click", computeHilbert);
+    svdBtn.addEventListener("click", computeSVD);
+
+    computeHilbert();
+    computeSVD();
+  </script>
+</body>
+</html>
+

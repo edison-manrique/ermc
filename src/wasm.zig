@@ -321,12 +321,21 @@ export fn ermc_alloc(n_bytes: usize) u32 {
     return @intFromPtr(buf.ptr);
 }
 
+export fn ermc_wasm_alloc(n_bytes: usize) u32 {
+    return ermc_alloc(n_bytes);
+}
+
 /// Libera una región previamente alojada con ermc_alloc.
 export fn ermc_free(ptr: u32, n_bytes: usize) void {
     if (ptr == 0) return;
     const slice: []u8 = @as([*]u8, @ptrFromInt(ptr))[0..n_bytes];
     allocator.free(slice);
 }
+
+export fn ermc_wasm_free(ptr: u32, n_bytes: usize) void {
+    ermc_free(ptr, n_bytes);
+}
+
 
 // ===========================================================================
 // ARITMÉTICA MODULAR EN F_p (Nuevo en v0.4.0)

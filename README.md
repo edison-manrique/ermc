@@ -451,26 +451,27 @@ console.log(SequenceAI.predictNext(seq)); // 144.0
 
 ### Módulos en Zig (`src/`)
 
-- [`src/root.zig`](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/root.zig): Exporta los submódulos públicos de la biblioteca.
-- [`src/engine.zig`](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/engine.zig): Fachada principal `OmniEngine` con flujo de regresión esparsa.
-- [`src/ffi.zig`](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/ffi.zig): Funciones exportadas con convención C (`callconv(.c)`) para interoperabilidad FFI nativa.
-- [`src/wasm.zig`](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/wasm.zig): Funciones exportadas con asignación lineal para WebAssembly freestanding.
-- [`src/modular/`](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/modular/): Aritmética modular en $\mathbb{F}_p$, inverso euclidiano, Tonelli-Shanks y regresión modular.
-- [`src/geometry/`](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/geometry/): Curvas elípticas $y^2 = x^3 + 7 \pmod p$, adición de grupo, multiplicación escalar y endomorfismo GLV.
-- [`src/series/`](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/series/): Tablas de diferencias finitas y análisis asintótico de Ramanujan/Riemann.
-- [`src/core/`](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/core/): Primitivas numéricas, sumas de Neumaier, RNG y utilidades SIMD.
-- [`src/linalg/`](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/linalg/): Álgebra lineal densa, factorización QR Householder, ortogonalización en espacios de Hilbert y SVD Jacobi.
-- [`src/stats/`](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/stats/): Filtro Hampel robusto a $10^{100}$, estimador de escala MAD y prueba ESD.
-- [`src/solver/`](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/solver/): STLSQ, SINDy para sistemas dinámicos, DMD, integradores RK4 y exponentes de Lyapunov.
-- [`src/symbolic/`](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/symbolic/): Diccionario de funciones no lineales y snapping a fracciones racionales exactas.
-- [`src/autodiff/`](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/autodiff/): Números duales y diferenciación automática forward-mode.
+- `src/root.zig`: Exporta los submódulos públicos de la biblioteca.
+- `src/engine.zig`: Fachada principal `OmniEngine` con flujo de regresión esparsa.
+- `src/ffi.zig`: Funciones exportadas con convención C (`callconv(.c)`) para interoperabilidad FFI nativa.
+- `src/wasm.zig`: Funciones exportadas con asignación lineal para WebAssembly freestanding.
+- `src/modular/`: Aritmética modular en $\mathbb{F}_p$, inverso euclidiano, Tonelli-Shanks y regresión modular.
+- `src/geometry/`: Curvas elípticas $y^2 = x^3 + 7 \pmod p$, adición de grupo, multiplicación escalar y endomorfismo GLV.
+- `src/series/`: Tablas de diferencias finitas y análisis asintótico de Ramanujan/Riemann.
+- `src/core/`: Primitivas numéricas, sumas de Neumaier, RNG y utilidades SIMD.
+- `src/linalg/`: Álgebra lineal densa, factorización QR Householder, ortogonalización en espacios de Hilbert y SVD Jacobi.
+- `src/stats/`: Filtro Hampel robusto a $10^{100}$, estimador de escala MAD y prueba ESD.
+- `src/solver/`: STLSQ, SINDy para sistemas dinámicos, DMD, integradores RK4 y exponentes de Lyapunov.
+- `src/symbolic/`: Diccionario de funciones no lineales y snapping a fracciones racionales exactas.
+- `src/autodiff/`: Números duales y diferenciación automática forward-mode.
 
 ---
 
 ## 📚 Documentación Adicional
 
-- **[Guía de Uso Completa (`GUIA_DE_USO.md`)](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/GUIA_DE_USO.md)**: Manual exhaustivo con explicaciones paso a paso de cada módulo, tablas de la API y ejemplos prácticos.
-- **[Playground WebAssembly (`bindings/wasm/playground/`)](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/bindings/wasm/playground/)**: Entorno interactivo visual para probar en el navegador todas las capacidades matemáticas de ERMC.
+- **[Guía de Uso Completa (`GUIA_DE_USO.md`)](./GUIA_DE_USO.md)**: Manual exhaustivo con explicaciones paso a paso de cada módulo, tablas de la API y ejemplos prácticos.
+- **[Playground WebAssembly (`bindings/wasm/playground/`)](./bindings/wasm/playground/)**: Entorno interactivo visual para probar en el navegador todas las capacidades matemáticas de ERMC.
+
 
 ---
 

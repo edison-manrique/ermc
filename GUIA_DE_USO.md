@@ -94,7 +94,7 @@ ermc/
 
 ## 2. Compilación de la Biblioteca y de la DLL
 
-El archivo [build.zig](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/build.zig) compila simultáneamente tanto el ejecutable de ejemplos como la biblioteca compartida dinámica:
+El archivo [build.zig](./build.zig) compila simultáneamente tanto el ejecutable de ejemplos como la biblioteca compartida dinámica:
 
 ### Comando de Compilación:
 ```bash
@@ -114,7 +114,7 @@ zig build -Doptimize=ReleaseFast
 
 ## 3. Ejecución de Tests Unitarios Modulares
 
-Todos los tests unitarios están segregados por dominio y agregados en [tests/root.zig](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/tests/root.zig).
+Todos los tests unitarios están segregados por dominio y agregados en [tests/root.zig](./tests/root.zig).
 
 ### Ejecutar la suite completa:
 ```bash
@@ -137,7 +137,7 @@ zig test tests/solver_test.zig
 
 ## 4. Ejecución de los Ejemplos Modulares
 
-Los 12 ejemplos científicos se ejecutan mediante el runner modular [examples/root.zig](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/examples/root.zig):
+Los 14 ejemplos científicos se ejecutan mediante el runner modular [examples/root.zig](./examples/root.zig):
 
 ```bash
 zig build run
@@ -190,7 +190,7 @@ pub fn main() !void {
 
 ## 6. Librería TypeScript en Bun (FFI Nativo)
 
-La librería incluye bindings completos para TypeScript en [bindings/bun/ermc.ts](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/bindings/bun/ermc.ts). Carga directamente `ermc.dll` usando `bun:ffi` con **cero costo de serialización**.
+La librería incluye bindings completos para TypeScript en [bindings/bun/](./bindings/bun/). Carga directamente `ermc.dll` usando `bun:ffi` con **cero costo de serialización**.
 
 ### Requisitos:
 1. Tener [Bun](https://bun.sh/) instalado (`bun --version`).
@@ -411,14 +411,14 @@ console.log("Horizonte de Predictibilidad (s):", predictabilityHorizon);
 Para exponer una nueva función matemática de Zig hacia Bun TypeScript:
 
 1. **Implementa la lógica en su submódulo correspondiente** dentro de `src/` (ej. `src/linalg/`, `src/stats/`, etc.).
-2. **Re-exporta la función con `export fn ... callconv(.c)` en [src/ffi.zig](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/ffi.zig)** usando punteros C estándar (`[*]const f64`, `[*]f64`, `usize`, etc.).
+2. **Re-exporta la función con `export fn ... callconv(.c)` en [src/ffi.zig](./src/ffi.zig)** usando punteros C estándar (`[*]const f64`, `[*]f64`, `usize`, etc.).
 3. **Recompila la DLL** ejecutando:
    ```bash
    zig build
    ```
-4. **Registra el símbolo FFI en [bindings/bun/src/ffi.ts](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/bindings/bun/src/ffi.ts)** dentro de `loadNativeSymbols`, indicando `args` y `returns` con `FFIType`.
+4. **Registra el símbolo FFI en [bindings/bun/src/ffi.ts](./bindings/bun/src/ffi.ts)** dentro de `loadNativeSymbols`, indicando `args` y `returns` con `FFIType`.
 5. **Crea un módulo TypeScript nuevo** en `bindings/bun/src/` (ej. `mi_modulo.ts`) con la clase wrapper que use `Float64Array`, `ptr()` y `getNativeLib()`.
-6. **Re-exporta desde [bindings/bun/src/index.ts](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/bindings/bun/src/index.ts)** añadiendo `export * from "./mi_modulo";`.
+6. **Re-exporta desde [bindings/bun/src/index.ts](./bindings/bun/src/index.ts)** añadiendo `export * from "./mi_modulo";`.
 
 ### Estructura modular de los bindings TypeScript:
 

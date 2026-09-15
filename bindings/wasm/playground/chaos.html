@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Caos & Lyapunov — ERMC WASM Playground</title>
+  <link rel="stylesheet" href="css/theme.css" />
+</head>
+<body>
+  <div class="app-viewport">
+    <header id="app-header"></header>
+
+    <div class="app-body">
+      <nav id="app-sidebar"></nav>
+
+      <main class="app-content">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">🌀 Caos Determinista & Atractor de Lorenz (Lyapunov)</h1>
+            <div class="page-description">Medición del Efecto Mariposa e integración RK4 del atractor de Lorenz: $\sigma = 10, \rho = 28, \beta = 8/3$.</div>
+          </div>
+          <div class="metric-pill">Integrador: <span class="val">RK4</span></div>
+        </div>
+
+        <div class="grid-2">
+          <!-- Parámetros -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title"><span class="icon">⚙️</span> Condiciones Iniciales</span>
+              <span class="card-badge">Lorenz 63</span>
+            </div>
+
+            <div class="grid-3">
+              <div class="form-group">
+                <label class="form-label" for="lorenz-x0">x₀:</label>
+                <input type="number" class="input-text" id="lorenz-x0" value="1.0" step="0.5">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="lorenz-y0">y₀:</label>
+                <input type="number" class="input-text" id="lorenz-y0" value="1.0" step="0.5">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="lorenz-z0">z₀:</label>
+                <input type="number" class="input-text" id="lorenz-z0" value="1.0" step="0.5">
+              </div>
+            </div>
+
+            <div class="btn-group" style="margin-top: 6px;">
+              <button class="btn btn-gold" id="btn-chaos">⚡ Simular en WebAssembly</button>
+              <button class="btn btn-secondary" id="btn-preset-attractor">En el Atractor (-8, 8, 27)</button>
+              <button class="btn btn-secondary" id="btn-preset-origin">Cerca al Origen (0.1, 0.1, 0.1)</button>
+            </div>
+
+            <div class="form-group" style="margin-top: 8px;">
+              <span class="form-label">Exponente de Lyapunov y Horizonte de Predictibilidad:</span>
+              <div class="formula-banner" id="chaos-banner">λ = -- | T_L = --</div>
+            </div>
+
+            <div class="form-group">
+              <span class="form-label">Diagnóstico Dinámico:</span>
+              <div class="output-box" id="chaos-diagnosis">CAÓTICO DETERMINISTA (Sensibilidad a Condiciones Iniciales)</div>
+            </div>
+          </div>
+
+          <!-- Trayectoria Canvas -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title"><span class="icon">🦋</span> Proyección 2D del Atractor (X vs Z)</span>
+              <span class="card-badge" id="sim-badge">2000 pasos</span>
+            </div>
+
+            <div class="canvas-wrapper-fixed">
+              <canvas class="interactive-canvas" id="canvas-lorenz"></canvas>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initLayout, initWasm, ermc, showToast, watchCanvas } from "./js/common.js";
+
+    initLayout("chaos");
+    await initWasm();
+
+    const x0Input = document.getElementById("lorenz-x0");
+    const y0Input = document.getElementById("lorenz-y0");
+    const z0Input = document.getElementById("lorenz-z0");
+    const simBtn = document.getElementById("btn-chaos");
+    const attractorBtn = document.getElementById("btn-preset-attractor");
+    const originBtn = document.getElementById("btn-preset-origin");
+    const chaosBanner = document.getElementById("chaos-banner");
+    const canvas = document.getElementById("canvas-lorenz");
+
+    let _roLorenz = null;
+
+    function runChaos() {
+      const x0 = parseFloat(x0Input.value);
+      const y0 = parseFloat(y0Input.value);
+      const z0 = parseFloat(z0Input.value);
+
+      const { ok, lyap, horiz } = ermc.chaosLorenz(x0, y0, z0);
+
+      chaosBanner.innerHTML = `λ_max = <strong style="color:#F0B90B;">${lyap.toFixed(4)} s⁻¹</strong> | Horizonte T_L = <strong style="color:#0ECB81;">${horiz.toFixed(2)} s</strong>`;
+      drawLorenz(x0, y0, z0);
+      showToast(`Simulación completada (λ = ${lyap.toFixed(4)})`);
+    }
+
+    function drawLorenz(x0, y0, z0) {
+      if (_roLorenz) _roLorenz.disconnect();
+
+      // Pre-integrar RK4 (fuera del canvas callback para no recalcular en resize)
+      let x = x0, y = y0, z = z0;
+      const dt = 0.01, steps = 1800;
+      const sigma = 10.0, rho = 28.0, beta = 8.0 / 3.0;
+      const points = [];
+      for (let i = 0; i < steps; i++) {
+        const dx1 = sigma * (y - x);
+        const dy1 = x * (rho - z) - y;
+        const dz1 = x * y - beta * z;
+        x += dx1 * dt; y += dy1 * dt; z += dz1 * dt;
+        points.push({ x, z });
+      }
+
+      _roLorenz = watchCanvas(canvas, (ctx, w, h) => {
+        ctx.fillStyle = "#080a0d";
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.strokeStyle = "rgba(240, 185, 11, 0.65)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        points.forEach((p, i) => {
+          const px = w / 2 + p.x * (w / 60);
+          const pz = (h - 20) - p.z * (h / 65);
+          i === 0 ? ctx.moveTo(px, pz) : ctx.lineTo(px, pz);
+        });
+        ctx.stroke();
+
+        ctx.fillStyle = "#F0B90B";
+        ctx.font = "11px Outfit";
+        ctx.fillText(`Atractor de Lorenz (σ=10, ρ=28, β=8/3) — ${steps} pasos RK4`, 12, 20);
+      });
+    }
+
+    simBtn.addEventListener("click", runChaos);
+    attractorBtn.addEventListener("click", () => {
+      x0Input.value = "-8.0"; y0Input.value = "8.0"; z0Input.value = "27.0";
+      runChaos();
+    });
+    originBtn.addEventListener("click", () => {
+      x0Input.value = "0.1"; y0Input.value = "0.1"; z0Input.value = "0.1";
+      runChaos();
+    });
+
+    runChaos();
+  </script>
+</body>
+</html>

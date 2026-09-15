@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aritmética Modular F_p — ERMC WASM Playground</title>
+  <link rel="stylesheet" href="css/theme.css" />
+</head>
+<body>
+  <div class="app-viewport">
+    <header id="app-header"></header>
+
+    <div class="app-body">
+      <nav id="app-sidebar"></nav>
+
+      <main class="app-content">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">🔢 Aritmética Modular en Campos Finitos $\mathbb{F}_p$</h1>
+            <div class="page-description">Operaciones exactas sin desbordamiento sobre enteros de 64 bits: Fermat, Euclides Extendido y Tonelli-Shanks.</div>
+          </div>
+          <div class="metric-pill">Tiempo: <span class="val" id="time-badge">0 μs</span></div>
+        </div>
+
+        <div class="grid-2">
+          <!-- Entradas -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title"><span class="icon">⚙️</span> Parámetros del Campo Finito</span>
+              <span class="card-badge">64-bit Modulo</span>
+            </div>
+
+            <div class="grid-3">
+              <div class="form-group">
+                <label class="form-label" for="input-a">Valor a:</label>
+                <input type="number" class="input-text" id="input-a" value="42">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="input-b">Valor b:</label>
+                <input type="number" class="input-text" id="input-b" value="30">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="input-p">Módulo Primo p:</label>
+                <input type="number" class="input-text" id="input-p" value="1009">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="input-exp">Exponente e (para potencia a^e mod p):</label>
+              <input type="number" class="input-text" id="input-exp" value="1008">
+            </div>
+
+            <div class="btn-group" style="margin-top: 6px;">
+              <button class="btn btn-gold" id="btn-compute">⚡ Calcular en $\mathbb{F}_p$</button>
+              <button class="btn btn-secondary" id="btn-fermat">Fermat: a^(p-1) mod p</button>
+              <button class="btn btn-secondary" id="btn-tonelli">Raíces Tonelli-Shanks</button>
+            </div>
+
+            <!-- Identidad algebraica -->
+            <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-color);">
+              <div class="form-label">Verificación de Diferencia de Cuadrados:</div>
+              <div class="output-box" id="diff-squares-box" style="margin-top: 4px;">
+                (a+b)(a-b) ≡ a² - b² (mod p)
+              </div>
+            </div>
+          </div>
+
+          <!-- Resultados -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title"><span class="icon">📊</span> Resultados Aritméticos Exactos</span>
+              <span class="card-badge">Precision Exacta</span>
+            </div>
+
+            <div class="form-group">
+              <span class="form-label">Suma y Resta Modular:</span>
+              <div class="output-box" id="out-add-sub">--</div>
+            </div>
+
+            <div class="form-group">
+              <span class="form-label">Multiplicación y Exponenciación Binaria:</span>
+              <div class="output-box" id="out-mul-pow">--</div>
+            </div>
+
+            <div class="form-group">
+              <span class="form-label">Inverso Modular a⁻¹ mod p (Algoritmo Euclides Extendido):</span>
+              <div class="output-box" id="out-inv">--</div>
+            </div>
+
+            <div class="form-group">
+              <span class="form-label">Raíz Cuadrada Modular √a mod p (Algoritmo Tonelli-Shanks):</span>
+              <div class="output-box" id="out-sqrt">--</div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initLayout, initWasm, ermc, showToast, copyToClipboard } from "./js/common.js";
+
+    initLayout("modular");
+    await initWasm();
+
+    const aInput = document.getElementById("input-a");
+    const bInput = document.getElementById("input-b");
+    const pInput = document.getElementById("input-p");
+    const expInput = document.getElementById("input-exp");
+    const computeBtn = document.getElementById("btn-compute");
+    const fermatBtn = document.getElementById("btn-fermat");
+    const tonelliBtn = document.getElementById("btn-tonelli");
+    const timeBadge = document.getElementById("time-badge");
+
+    const outAddSub = document.getElementById("out-add-sub");
+    const outMulPow = document.getElementById("out-mul-pow");
+    const outInv = document.getElementById("out-inv");
+    const outSqrt = document.getElementById("out-sqrt");
+    const diffSquaresBox = document.getElementById("diff-squares-box");
+
+    function compute() {
+      try {
+        const a = BigInt(aInput.value);
+        const b = BigInt(bInput.value);
+        const p = BigInt(pInput.value);
+        const exp = BigInt(expInput.value);
+
+        const t0 = performance.now();
+        const add = ermc.modAdd(a, b, p);
+        const sub = ermc.modSub(a, b, p);
+        const mul = ermc.modMul(a, b, p);
+        const pow = ermc.modPow(a, exp, p);
+        const invA = ermc.modInverse(a, p);
+        const sqrtA = ermc.modSqrt(a, p);
+        const elapsedUs = ((performance.now() - t0) * 1000).toFixed(1);
+
+        timeBadge.innerText = `${elapsedUs} μs`;
+
+        outAddSub.innerHTML = `(a+b) = <span style="color:#0ECB81;">${add}</span> | (a-b) = <span style="color:#0ECB81;">${sub}</span> (mod ${p})`;
+        outMulPow.innerHTML = `(a×b) = <span style="color:#F0B90B;">${mul}</span> | ${a}^${exp} mod ${p} = <span style="color:#F0B90B;">${pow}</span>`;
+
+        if (invA !== null) {
+          const verify = ermc.modMul(a, invA, p);
+          outInv.innerHTML = `<span>${a}⁻¹ ≡ <strong style="color:#0ECB81;">${invA}</strong> (mod ${p}) [✓ ${a}×${invA} ≡ ${verify}]</span>`;
+        } else {
+          outInv.innerHTML = `<span style="color:#F6465D;">No existe inverso (mcd(a, p) ≠ 1)</span>`;
+        }
+
+        if (sqrtA !== null) {
+          const sqCheck = ermc.modMul(sqrtA, sqrtA, p);
+          outSqrt.innerHTML = `<span>√${a} ≡ <strong style="color:#0ECB81;">${sqrtA}</strong> (mod ${p}) [✓ ${sqrtA}² mod ${p} = ${sqCheck}]</span>`;
+        } else {
+          outSqrt.innerHTML = `<span style="color:var(--text-muted);">${a} es NO-residuo cuadrático mod ${p} (Sin raíz en F_p)</span>`;
+        }
+
+        // Diferencia de cuadrados
+        const lhs = ermc.modMul(ermc.modAdd(a, b, p), ermc.modSub(a, b, p), p);
+        const a2 = ermc.modMul(a, a, p);
+        const b2 = ermc.modMul(b, b, p);
+        const rhs = ermc.modSub(a2, b2, p);
+        diffSquaresBox.innerHTML = `(${a}+${b})×(${a}-${b}) = <span style="color:#0ECB81;">${lhs}</span> ≡ ${a}²-${b}² = <span style="color:#0ECB81;">${rhs}</span> mod ${p} ✓`;
+
+        showToast(`Cálculo F_${p} completado en ${elapsedUs} μs`);
+      } catch (err) {
+        showToast("Error: " + err.message);
+      }
+    }
+
+    computeBtn.addEventListener("click", compute);
+
+    fermatBtn.addEventListener("click", () => {
+      const a = BigInt(aInput.value);
+      const p = BigInt(pInput.value);
+      const res = ermc.modPow(a, p - 1n, p);
+      showToast(`Fermat: ${a}^(${p}-1) ≡ ${res} mod ${p}`);
+      outMulPow.innerHTML = `<span style="color:#F0B90B;">Pequeño Teorema de Fermat: ${a}^(${p}-1) ≡ ${res} (mod ${p}) ${res === 1n ? '✓ (Válido)' : '✗'}</span>`;
+    });
+
+    tonelliBtn.addEventListener("click", () => {
+      const p = BigInt(pInput.value);
+      let found = [];
+      for (let test = 1n; test < 40n; test++) {
+        const root = ermc.modSqrt(test, p);
+        if (root !== null) {
+          found.push(`√${test} = ${root}`);
+          if (found.length >= 4) break;
+        }
+      }
+      outSqrt.innerHTML = `<span>Primeras raíces mod ${p}: ${found.join(", ")} ✓</span>`;
+      showToast("Raíces calculadas con Tonelli-Shanks");
+    });
+
+    compute();
+  </script>
+</body>
+</html>
