@@ -1,9 +1,8 @@
-/* ═══════════════════════════════════════════════════════════════════════════
+﻿/* ═══════════════════════════════════════════════════════════════════════════
    ERMC WebAssembly Scientific Playground — Dark Gold Compact Theme
    Full Viewport (100vw x 100vh) Zero-Scroll Architecture
    ═══════════════════════════════════════════════════════════════════════════ */
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
-@import url('https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css');
 
 :root {
   /* Color Palette - Dark & Gold Premium */
@@ -754,19 +753,4 @@ canvas.interactive-canvas {
   padding: 3px 10px;
   border: 1px solid var(--border-color);
   color: var(--text-muted);
-}
-
-/* KaTeX Math Overrides */
-.katex {
-  font-size: 1em !important;
-  color: var(--text-main);
-}
-
-.katex-display {
-  margin: 8px 0;
-  overflow-x: auto;
-}
-
-.katex-display > .katex {
-  color: var(--gold-primary);
 }

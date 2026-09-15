@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -122,148 +122,259 @@
     let currentWeights = [];
     let currentNVars = 1;
 
-    function runFit() {
-      const preset = presetSelect.value;
-      const nSamples = parseInt(samplesInput.value, 10);
-      const noise = parseFloat(noiseInput.value);
-      const lambda = parseFloat(lambdaInput.value);
-
-      let nVars = 1;
-      let activations = [0, 5]; // Identity, Poly
-      let X_flat = [];
-      let y = [];
-      let trueFormula = "";
-
-      const gaussian = () => (Math.random() + Math.random() - 1) * noise * 2;
-
-      if (preset === "pendulum") {
-        nVars = 2;
-        activations = [0, 1, 5]; // Identity, Sine, Poly
-        trueFormula = "-9.8100*sin(x0) - 0.5000*x1^2";
-        testInput.value = "0.785, 1.5";
-        for (let i = 0; i < nSamples; i++) {
-          const th = (Math.random() - 0.5) * 2.0;
-          const w = (Math.random() - 0.5) * 4.0;
-          X_flat.push(th, w);
-          y.push(-9.81 * Math.sin(th) - 0.5 * w * w + gaussian());
+    const presetConfigs = {
+      pendulum: {
+        nVars: 2,
+        activations: [0, 1, 3], // Identity, Sine, Square
+        lambda: 0.02,
+        samples: 200,
+        test: "0.785, 1.5",
+        trueFormula: "-9.8100*sin(x₀) - 0.5000*x₁²",
+        gen: (gaussian) => {
+          const th = (Math.random() - 0.5) * 3.0;
+          const w = Math.random() * 3.0;
+          return { inVec: [th, w], y: -9.81 * Math.sin(th) - 0.5 * w * w + gaussian() };
         }
-      } else if (preset === "snell") {
-        nVars = 1;
-        activations = [0, 1]; // Identity, Sine
-        trueFormula = "(4/3)*sin(x0)  [n1·sin(θ) = 1.3333·sin(θ)]";
-        testInput.value = "0.523";
-        for (let i = 0; i < nSamples; i++) {
-          const th = Math.random() * 1.2;
-          X_flat.push(th);
-          y.push((4.0 / 3.0) * Math.sin(th) + gaussian());
+      },
+      snell: {
+        nVars: 1,
+        activations: [0, 1], // Identity, Sine
+        lambda: 0.01,
+        samples: 150,
+        test: "0.523",
+        trueFormula: "(4/3)*sin(x₀)  [n₁·sin(θ) = 1.3333·sin(θ)]",
+        gen: (gaussian) => {
+          const th = 0.05 + Math.random() * 1.15;
+          return { inVec: [th], y: (4.0 / 3.0) * Math.sin(th) + gaussian() };
         }
-      } else if (preset === "adiabatic") {
-        nVars = 2;
-        activations = [0, 5];
-        trueFormula = "(5/3)*x0*x1  [Gamma = 1.6667]";
-        testInput.value = "2.0, 1.5";
-        for (let i = 0; i < nSamples; i++) {
+      },
+      adiabatic: {
+        nVars: 2,
+        activations: [0, 3], // Identity, Square -> bilinear interaction x0*x1
+        lambda: 0.01,
+        samples: 200,
+        test: "2.0, 1.5",
+        trueFormula: "(5/3)*x₀*x₁  [γ = 1.6667]",
+        gen: (gaussian) => {
           const T = 1.0 + Math.random() * 4.0;
-          const invV = 0.5 + Math.random() * 2.0;
-          X_flat.push(T, invV);
-          y.push((5.0 / 3.0) * T * invV + gaussian());
+          const invV = 0.5 + Math.random() * 2.5;
+          return { inVec: [T, invV], y: (5.0 / 3.0) * T * invV + gaussian() };
         }
-      } else if (preset === "torricelli") {
-        nVars = 1;
-        activations = [0, 4]; // Identity, Sqrt
-        trueFormula = "4.4287*sqrt(x0)  [v = √(2gh)]";
-        testInput.value = "2.5";
-        for (let i = 0; i < nSamples; i++) {
+      },
+      torricelli: {
+        nVars: 1,
+        activations: [0, 7], // Identity, Sqrt
+        lambda: 0.01,
+        samples: 150,
+        test: "2.5",
+        trueFormula: "4.4287*sqrt(x₀)  [v = √(2gh)]",
+        gen: (gaussian) => {
           const h = 0.2 + Math.random() * 4.8;
-          X_flat.push(h);
-          y.push(Math.sqrt(2 * 9.80665 * h) + gaussian());
+          return { inVec: [h], y: Math.sqrt(2 * 9.80665 * h) + gaussian() };
         }
-      } else if (preset === "hooke") {
-        nVars = 2;
-        activations = [0];
-        trueFormula = "-10.0000*x0 - 0.3000*x1";
-        testInput.value = "1.0, 2.0";
-        for (let i = 0; i < nSamples; i++) {
+      },
+      hooke: {
+        nVars: 2,
+        activations: [0], // Identity (linear terms x0, x1)
+        lambda: 0.05,
+        samples: 150,
+        test: "1.0, 2.0",
+        trueFormula: "-10.0000*x₀ - 0.3000*x₁",
+        gen: (gaussian) => {
           const x = (Math.random() - 0.5) * 2.0;
           const v = (Math.random() - 0.5) * 4.0;
-          X_flat.push(x, v);
-          y.push(-10.0 * x - 0.3 * v + gaussian());
+          return { inVec: [x, v], y: -10.0 * x - 0.3 * v + gaussian() };
         }
       }
+    };
 
-      currentNVars = nVars;
-      if (currentEngine) ermc.destroyEngine(currentEngine);
+    function updatePresetDefaults() {
+      const cfg = presetConfigs[presetSelect.value];
+      if (!cfg) return;
+      lambdaInput.value = cfg.lambda;
+      samplesInput.value = cfg.samples;
+      testInput.value = cfg.test;
+      trueBox.innerText = cfg.trueFormula;
+    }
+
+    presetSelect.addEventListener("change", () => {
+      updatePresetDefaults();
+      runFit();
+    });
+
+    function runFit() {
+      const presetKey = presetSelect.value;
+      const cfg = presetConfigs[presetKey];
+      if (!cfg) return;
+
+      const nSamples = parseInt(samplesInput.value, 10) || cfg.samples;
+      const noise = parseFloat(noiseInput.value) || 0.0;
+      const lambda = parseFloat(lambdaInput.value) || cfg.lambda;
+
+      const gaussian = () => (Math.random() + Math.random() - 1) * noise * 2;
+      const samples = [];
+      const X_flat = [];
+      const y = [];
+
+      for (let i = 0; i < nSamples; i++) {
+        const s = cfg.gen(gaussian);
+        samples.push(s);
+        X_flat.push(...s.inVec);
+        y.push(s.y);
+      }
+
+      currentNVars = cfg.nVars;
+      if (currentEngine) {
+        ermc.destroyEngine(currentEngine);
+        currentEngine = null;
+      }
 
       const t0 = performance.now();
-      currentEngine = ermc.createEngine(nVars);
-      ermc.buildDictionary(currentEngine, activations);
+      currentEngine = ermc.createEngine(cfg.nVars);
+      ermc.buildDictionary(currentEngine, cfg.activations);
       const { ok, weights } = ermc.fit(currentEngine, X_flat, y, lambda);
       const formula = ermc.getFormula(currentEngine, weights);
       const elapsedUs = ((performance.now() - t0) * 1000).toFixed(1);
 
       currentWeights = weights;
       timeBadge.innerText = `${elapsedUs} μs`;
-      termsBadge.innerText = `${weights.filter(w => Math.abs(w) > 1e-4).length} activos`;
-      trueBox.innerText = trueFormula;
-      discBox.innerText = formula;
+      const nActive = weights.filter(w => Math.abs(w) > 1e-4).length;
+      termsBadge.innerText = `${nActive} ${nActive === 1 ? "activo" : "activos"}`;
+      trueBox.innerText = cfg.trueFormula;
+      discBox.innerText = formula || "0.0000";
 
-      drawPlot(X_flat, y, nVars);
+      lastSamples = samples;
+      drawPlot(samples, cfg.nVars);
       showToast(`Ley descubierta en ${elapsedUs} μs`);
     }
 
-    function drawPlot(X_flat, y, nVars) {
+    function drawPlot(samples, nVars) {
       const ctx = canvas.getContext("2d");
-      const w = canvas.width = (canvas.parentElement.getBoundingClientRect().width || 600);
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const w = canvas.width = Math.floor(rect.width) || 600;
       const h = canvas.height = 260;
 
       ctx.fillStyle = "#0B0E11";
       ctx.fillRect(0, 0, w, h);
 
-      const minY = Math.min(...y);
-      const maxY = Math.max(...y);
-      const rangeY = (maxY - minY) || 1;
+      const yVals = samples.map(s => s.y);
+      let minY = Math.min(...yVals);
+      let maxY = Math.max(...yVals);
+      if (Math.abs(maxY - minY) < 1e-6) { minY -= 1; maxY += 1; }
+      const padY = (maxY - minY) * 0.08;
+      minY -= padY; maxY += padY;
+      const rangeY = maxY - minY;
 
-      // Ejes
-      ctx.strokeStyle = "#242C3B";
+      const padL = 45, padR = 25, padT = 25, padB = 30;
+      const plotW = w - padL - padR;
+      const plotH = h - padT - padB;
+
+      // Ejes y Grid
+      ctx.strokeStyle = "#1A202C";
       ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(35, 20); ctx.lineTo(35, h - 25); ctx.lineTo(w - 20, h - 25);
-      ctx.stroke();
-
-      // Puntos reales (dorados)
-      ctx.fillStyle = "rgba(240, 185, 11, 0.75)";
-      for (let i = 0; i < y.length; i++) {
-        const px = 35 + (i / (y.length - 1)) * (w - 60);
-        const py = (h - 25) - ((y[i] - minY) / rangeY) * (h - 50);
+      for (let g = 0; g <= 4; g++) {
+        const gy = padT + (g / 4) * plotH;
         ctx.beginPath();
-        ctx.arc(px, py, 2.5, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.moveTo(padL, gy); ctx.lineTo(padL + plotW, gy);
+        ctx.stroke();
+
+        const val = maxY - (g / 4) * rangeY;
+        ctx.fillStyle = "#5A6577";
+        ctx.font = "10px Outfit, sans-serif";
+        ctx.textAlign = "right";
+        ctx.fillText(val.toFixed(1), padL - 8, gy + 3);
       }
 
-      // Curva descubierta (verde esmeralda)
-      ctx.strokeStyle = "#0ECB81";
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = "#2E384D";
+      ctx.lineWidth = 1.2;
       ctx.beginPath();
-      for (let i = 0; i < y.length; i++) {
-        const inVec = [];
-        for (let v = 0; v < nVars; v++) inVec.push(X_flat[i * nVars + v]);
-        const pred = ermc.predict(currentEngine, inVec, currentWeights);
-        const px = 35 + (i / (y.length - 1)) * (w - 60);
-        const py = (h - 25) - ((pred - minY) / rangeY) * (h - 50);
-        if (i === 0) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
-      }
+      ctx.moveTo(padL, padT); ctx.lineTo(padL, padT + plotH); ctx.lineTo(padL + plotW, padT + plotH);
       ctx.stroke();
 
-      ctx.fillStyle = "rgba(240, 185, 11, 0.9)";
-      ctx.font = "10px Outfit";
-      ctx.fillText("● Muestras Reales", w - 210, 22);
+      if (nVars === 1) {
+        // Modo 1D: Eje horizontal es la variable de entrada x₀
+        const sorted = samples.slice().sort((a, b) => a.inVec[0] - b.inVec[0]);
+        const minX = sorted[0].inVec[0];
+        const maxX = sorted[sorted.length - 1].inVec[0];
+        const rangeX = (maxX - minX) || 1;
+
+        // Puntos reales (dorado)
+        ctx.fillStyle = "rgba(240, 185, 11, 0.85)";
+        for (const s of sorted) {
+          const px = padL + ((s.inVec[0] - minX) / rangeX) * plotW;
+          const py = padT + plotH - ((s.y - minY) / rangeY) * plotH;
+          ctx.beginPath();
+          ctx.arc(px, py, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Curva continua del modelo descubierto (verde esmeralda)
+        if (currentEngine && currentWeights.length > 0) {
+          ctx.strokeStyle = "#0ECB81";
+          ctx.lineWidth = 2.2;
+          ctx.beginPath();
+          const nSteps = 120;
+          for (let s = 0; s <= nSteps; s++) {
+            const xv = minX + (s / nSteps) * rangeX;
+            const pred = ermc.predict(currentEngine, [xv], currentWeights);
+            const px = padL + (s / nSteps) * plotW;
+            const py = padT + plotH - ((pred - minY) / rangeY) * plotH;
+            if (s === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+          }
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = "#718096";
+        ctx.font = "10px Outfit, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(`x₀ (rango [${minX.toFixed(2)}, ${maxX.toFixed(2)}])`, padL + plotW / 2, h - 8);
+
+      } else {
+        // Modo 2D+: Ordenar muestras por objetivo y para comparar perfil de regresión
+        const sorted = samples.slice().sort((a, b) => a.y - b.y);
+
+        // Curva descubierta f(X) (verde esmeralda)
+        if (currentEngine && currentWeights.length > 0) {
+          ctx.strokeStyle = "#0ECB81";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          for (let i = 0; i < sorted.length; i++) {
+            const pred = ermc.predict(currentEngine, sorted[i].inVec, currentWeights);
+            const px = padL + (i / (sorted.length - 1)) * plotW;
+            const py = padT + plotH - ((pred - minY) / rangeY) * plotH;
+            if (i === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+          }
+          ctx.stroke();
+        }
+
+        // Puntos reales (dorado)
+        ctx.fillStyle = "rgba(240, 185, 11, 0.8)";
+        for (let i = 0; i < sorted.length; i++) {
+          const px = padL + (i / (sorted.length - 1)) * plotW;
+          const py = padT + plotH - ((sorted[i].y - minY) / rangeY) * plotH;
+          ctx.beginPath();
+          ctx.arc(px, py, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.fillStyle = "#718096";
+        ctx.font = "10px Outfit, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(`Muestras ordenadas por objetivo f(X) [N = ${sorted.length}]`, padL + plotW / 2, h - 8);
+      }
+
+      // Leyenda
+      ctx.textAlign = "left";
+      ctx.fillStyle = "rgba(240, 185, 11, 0.95)";
+      ctx.font = "10px Outfit, sans-serif";
+      ctx.fillText("● Muestras Reales", w - 220, 16);
       ctx.fillStyle = "#0ECB81";
-      ctx.fillText("― Modelo Simbólico Descubierto", w - 210, 36);
+      ctx.fillText("― Modelo Simbólico Descubierto", w - 120, 16);
     }
 
     fitBtn.addEventListener("click", runFit);
-    presetSelect.addEventListener("change", runFit);
 
     predictBtn.addEventListener("click", () => {
       if (!currentEngine || currentWeights.length === 0) {
@@ -279,6 +390,13 @@
       predictOutput.innerHTML = `f([${vals.slice(0, currentNVars).join(", ")}]) = <span style="color: #0ECB81; font-weight: 700;">${pred.toFixed(5)}</span>`;
     });
 
+    let lastSamples = null;
+
+    window.addEventListener("resize", () => {
+      if (lastSamples && currentEngine) drawPlot(lastSamples, currentNVars);
+    });
+
+    updatePresetDefaults();
     runFit();
   </script>
 </body>

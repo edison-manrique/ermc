@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Copyright (c) 2026 Edison Manrique Chocce
  * Licencia Dual: AGPL-3.0 | Comercial segun LICENSE.
  *
@@ -95,7 +95,7 @@ class ErmcWasmEngine {
   fit(h, X, y, lambda = 0.05) {
     const pX = this.writeF64Array(X), py = this.writeF64Array(y);
     const nT = this.getTermCount(h), pW = this.alloc(nT * 8);
-    const ok = this.exports.ermc_engine_fit(h, pX, py, y.length, Math.round(X.length / y.length), lambda, pW) !== 0;
+    const ok = this.exports.ermc_engine_fit(h, pX, py, y.length, lambda, pW) !== 0;
     const weights = ok ? this.readF64Array(pW, nT) : [];
     this.free(pX, X.length * 8); this.free(py, y.length * 8); this.free(pW, nT * 8);
     return { ok, weights };
@@ -198,55 +198,6 @@ export function fitCanvas(canvas) {
   canvas.style.width = w + "px"; canvas.style.height = h + "px";
   const ctx = canvas.getContext("2d"); ctx.scale(dpr, dpr);
   return { ctx, w, h };
-}
-
-// MATH & MARKDOWN — KaTeX + marked lazy-loaded from CDN
-let _katexP = null, _markedP = null;
-function loadScript(src) {
-  return new Promise((ok, fail) => {
-    const s = document.createElement("script");
-    s.src = src; s.defer = true; s.onload = ok; s.onerror = fail;
-    document.head.appendChild(s);
-  });
-}
-async function loadKatex()  { if (!_katexP)  _katexP  = window.katex  ? Promise.resolve(window.katex)  : loadScript("https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js").then(() => window.katex);  return _katexP; }
-async function loadMarked() { if (!_markedP) _markedP = window.marked ? Promise.resolve(window.marked) : loadScript("https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js").then(() => window.marked); return _markedP; }
-
-export async function renderMath(element) {
-  const katex = await loadKatex();
-  if (!katex || !element) return;
-  function walk(node) {
-    if (node.nodeType === Node.TEXT_NODE) {
-      const text = node.textContent;
-      if (!text.includes("$")) return;
-      const re = /\$\$([^$]+)\$\$|\$([^$\n]+)\$/g;
-      const frag = document.createDocumentFragment();
-      let last = 0, m;
-      while ((m = re.exec(text)) !== null) {
-        if (m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
-        const display = !!m[1], formula = (m[1] || m[2]).trim();
-        const wrap = document.createElement(display ? "div" : "span");
-        try { katex.render(formula, wrap, { throwOnError: false, displayMode: display, output: "html" }); }
-        catch { wrap.textContent = m[0]; }
-        frag.appendChild(wrap);
-        last = m.index + m[0].length;
-      }
-      if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
-      node.parentNode.replaceChild(frag, node);
-    } else if (node.nodeType === Node.ELEMENT_NODE && !["SCRIPT","STYLE","CODE","PRE"].includes(node.tagName)) {
-      Array.from(node.childNodes).forEach(walk);
-    }
-  }
-  walk(element);
-}
-
-export async function renderMarkdown(markdown, element) {
-  const [marked] = await Promise.all([loadMarked(), loadKatex()]);
-  if (!marked || !element) return;
-  marked.setOptions({ gfm: true, breaks: true });
-  element.innerHTML = marked.parse(markdown);
-  element.classList.add("md-content");
-  await renderMath(element);
 }
 
 // UTILITIES
