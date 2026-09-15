@@ -34,6 +34,16 @@ zig-out/
 .env.production
 .env.test
 
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
 # Archivos del Sistema Operativo
 .DS_Store
 Thumbs.db
