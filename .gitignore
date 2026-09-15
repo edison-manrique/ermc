@@ -1,0 +1,40 @@
+# Dependencias — Node / Bun
+node_modules/
+bun.lockb
+package-lock.json
+
+# Salida de compilación Zig y Caches
+.zig-cache/
+zig-out/
+*.o
+*.obj
+*.pdb
+
+# Binarios y librerías generadas
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Agentes e IA
+.agent/
+.agents/
+.gemini/
+
+# Variables de entorno
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Archivos del Sistema Operativo
+.DS_Store
+Thumbs.db
+ehthumbs.db

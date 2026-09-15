@@ -1,0 +1,13 @@
+{
+  "name": "ermc-bun",
+  "version": "0.3.0",
+  "description": "Exact Regression Mathematical Core (ERMC) TypeScript/Bun bindings powered by high-performance Zig FFI DLL",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "demo": "bun run demo.ts"
+  },
+  "keywords": ["math", "machine-learning", "sciml", "symbolic-regression", "hilbert-spaces", "zig", "ffi", "bun"],
+  "author": "Edison Manrique Chocce",
+  "license": "AGPL-3.0-or-later"
+}

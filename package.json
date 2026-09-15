@@ -1,0 +1,72 @@
+{
+  "name": "ermc",
+  "version": "0.3.0",
+  "description": "Exact Regression Mathematical Core (ERMC) — Motor de Scientific Machine Learning (SciML), descubrimiento simbólico de ecuaciones físicas, álgebra en espacios de Hilbert (MGS-DGKS), SVD Jacobi, DMD, teoría del caos (Lyapunov), diferenciación automática y aritmética compensada Neumaier de ultra precisión (Zig 0.16 + TypeScript/Bun FFI).",
+  "author": "Edison Manrique Chocce",
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "main": "./bindings/bun/src/index.ts",
+  "module": "./bindings/bun/src/index.ts",
+  "types": "./bindings/bun/src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./bindings/bun/src/index.ts",
+      "import": "./bindings/bun/src/index.ts",
+      "default": "./bindings/bun/src/index.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "bindings/bun",
+    "src",
+    "LICENSE",
+    "README.md",
+    "GUIA_DE_USO.md"
+  ],
+  "scripts": {
+    "build": "zig build",
+    "build:fast": "zig build -Doptimize=ReleaseFast",
+    "test": "zig build test",
+    "test:all": "zig build test && bun run bindings/bun/demo.ts",
+    "run:examples": "zig build run",
+    "demo": "bun run bindings/bun/demo.ts",
+    "copyright": "bun run scripts/add_copyright.ts"
+  },
+  "keywords": [
+    "ermc",
+    "exact-regression",
+    "mathematical-core",
+    "sciml",
+    "machine-learning",
+    "symbolic-regression",
+    "sindy",
+    "stlsq",
+    "hilbert-spaces",
+    "mgs-dgks",
+    "svd",
+    "jacobi",
+    "dmd",
+    "chaos",
+    "lyapunov",
+    "neumaier",
+    "hampel-filter",
+    "outliers",
+    "autodiff",
+    "zig",
+    "bun",
+    "typescript",
+    "ffi"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/edison-manrique/ermc.git"
+  },
+  "bugs": {
+    "url": "https://github.com/edison-manrique/ermc/issues"
+  },
+  "homepage": "https://github.com/edison-manrique/ermc#readme",
+  "engines": {
+    "bun": ">=1.0.0",
+    "node": ">=18.0.0"
+  }
+}
