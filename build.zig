@@ -72,4 +72,42 @@ pub fn build(b: *std.Build) void {
     const run_unit_tests = b.addRunArtifact(unit_tests);
     const test_step = b.step("test", "Ejecutar todas las pruebas unitarias y de integración");
     test_step.dependOn(&run_unit_tests.step);
+
+    // =========================================================================
+    // WASM: Compilar ERMC como WebAssembly (wasm32-freestanding, ReleaseFast)
+    // Uso: zig build wasm
+    // Salida: zig-out/wasm/ermc.wasm
+    // =========================================================================
+    const wasm_target = b.resolveTargetQuery(.{
+        .cpu_arch = .wasm32,
+        .os_tag = .freestanding,
+    });
+
+    const wasm_mod = b.addModule("ermc", .{
+        .root_source_file = b.path("src/root.zig"),
+        .target = wasm_target,
+        .optimize = .ReleaseFast,
+    });
+
+    const wasm_exe = b.addExecutable(.{
+        .name = "ermc",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/wasm.zig"),
+            .target = wasm_target,
+            .optimize = .ReleaseFast,
+            .imports = &.{
+                .{ .name = "ermc", .module = wasm_mod },
+            },
+        }),
+    });
+    // WASM freestanding: exportar todas las funciones, sin entry point OS
+    wasm_exe.entry = .disabled;
+    wasm_exe.rdynamic = true;
+
+    const wasm_install = b.addInstallArtifact(wasm_exe, .{
+        .dest_dir = .{ .override = .{ .custom = "wasm" } },
+    });
+
+    const wasm_step = b.step("wasm", "Compilar ERMC como WebAssembly (wasm32-freestanding, ReleaseFast)");
+    wasm_step.dependOn(&wasm_install.step);
 }

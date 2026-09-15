@@ -440,3 +440,58 @@ bindings/bun/
     ├── dmd.ts              ← DMD (modos dinámicos)
     └── chaos.ts            ← Chaos (Lyapunov)
 ```
+
+---
+
+## 9. WebAssembly (WASM) para Navegadores y Runtimes JS
+
+ERMC se compila nativamente como módulo WebAssembly independiente (`wasm32-freestanding`) en modo ultra-optimizado (`ReleaseFast`), sin dependencias de sistema operativo:
+
+### 9.1. Compilación del binario WASM:
+```bash
+zig build wasm
+```
+Genera el artefacto: `zig-out/wasm/ermc.wasm`
+
+### 9.2. Estructura de los Bindings WASM:
+```
+bindings/wasm/
+├── ermc_wasm.ts         ← Loader WebAssembly con gestión de memoria y wrappers
+├── index.ts             ← Re-exportador central
+├── package.json         ← Configuración de paquete @ermc/wasm
+└── demo/                ← Suite de 8 demostraciones modulares sincronizadas
+    ├── 01_hilbert.ts
+    ├── 02_precision.ts
+    ├── 03_outliers.ts
+    ├── 04_sequence.ts
+    ├── 05_svd.ts
+    ├── 06_engine.ts
+    ├── 07_dmd.ts
+    ├── 08_chaos.ts
+    └── run_all.ts
+```
+
+### 9.3. Ejecutar las Demos WASM con Bun:
+```bash
+cd bindings/wasm
+bun run demo/run_all.ts
+```
+
+### 9.4. Uso en Código TypeScript / Navegador:
+```typescript
+import { loadErmc, OmniEngine, Activation, HilbertSpace } from "./bindings/wasm";
+
+// Inicializar el módulo WebAssembly
+await loadErmc();
+
+// Usar cualquier módulo ERMC
+const e1 = [1, 0, 0], e2 = [0, 1, 0];
+console.log("Ortogonalidad:", HilbertSpace.inner(e1, e2)); // 0.0
+
+const engine = new OmniEngine(2);
+engine.buildDictionary([Activation.Identity, Activation.Sine, Activation.Square]);
+const weights = engine.fit(inputs, targets, 0.02);
+console.log("Ecuación física descubierta:", engine.getFormula(weights));
+engine.dispose();
+```
+
