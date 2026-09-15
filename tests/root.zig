@@ -26,6 +26,7 @@ test {
     _ = @import("orthogonal_test.zig");
     _ = @import("solver_test.zig");
     _ = @import("symplectic_test.zig");
+    _ = @import("levenberg_marquardt_test.zig");
     _ = @import("autodiff_test.zig");
     _ = @import("series_test.zig");
 }

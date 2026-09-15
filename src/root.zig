@@ -135,6 +135,9 @@ pub const solver = struct {
 
     // Integradores Simplécticos (Hamiltoniano)
     pub const symplectic = @import("solver/symplectic.zig");
+
+    // Optimización No Lineal (Levenberg-Marquardt)
+    pub const levenberg_marquardt = @import("solver/levenberg_marquardt.zig");
 };
 
 pub const series = struct {
@@ -166,4 +169,8 @@ pub const symplectic = solver.symplectic;
 pub const SymplecticAlgorithm = solver.symplectic.SymplecticAlgorithm;
 pub const SymplecticResult = solver.symplectic.SymplecticResult;
 pub const integrateSymplectic = solver.symplectic.integrateSymplectic;
+pub const lm = solver.levenberg_marquardt;
+pub const minimizeLm = solver.levenberg_marquardt.minimizeLm;
+pub const LmOptions = solver.levenberg_marquardt.LmOptions;
+pub const LmResult = solver.levenberg_marquardt.LmResult;
 
