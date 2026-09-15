@@ -1,7 +1,7 @@
 {
   "name": "ermc",
-  "version": "0.3.0",
-  "description": "Exact Regression Mathematical Core (ERMC) — Motor de Scientific Machine Learning (SciML), descubrimiento simbólico de ecuaciones físicas, álgebra en espacios de Hilbert (MGS-DGKS), SVD Jacobi, DMD, teoría del caos (Lyapunov), diferenciación automática y aritmética compensada Neumaier de ultra precisión (Zig 0.16 + TypeScript/Bun FFI).",
+  "version": "0.4.0",
+  "description": "Exact Regression Mathematical Core (ERMC) — Motor de Scientific Machine Learning (SciML), descubrimiento simbólico de ecuaciones físicas, curvas elípticas, aritmética modular F_p, álgebra en espacios de Hilbert (MGS-DGKS), SVD Jacobi, DMD, teoría del caos (Lyapunov), diferenciación automática y aritmética compensada Neumaier de ultra precisión (Zig 0.16 + TypeScript/Bun FFI + WebAssembly + Python).",
   "author": "Edison Manrique Chocce",
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -14,10 +14,17 @@
       "import": "./bindings/bun/src/index.ts",
       "default": "./bindings/bun/src/index.ts"
     },
+    "./wasm": {
+      "types": "./bindings/wasm/src/index.ts",
+      "import": "./bindings/wasm/src/index.ts",
+      "default": "./bindings/wasm/src/index.ts"
+    },
     "./package.json": "./package.json"
   },
   "files": [
     "bindings/bun",
+    "bindings/wasm",
+    "bindings/python",
     "src",
     "LICENSE",
     "README.md",
@@ -26,10 +33,14 @@
   "scripts": {
     "build": "zig build",
     "build:fast": "zig build -Doptimize=ReleaseFast",
+    "build:wasm": "zig build wasm",
     "test": "zig build test",
     "test:all": "zig build test && bun run bindings/bun/demo.ts",
     "run:examples": "zig build run",
     "demo": "bun run bindings/bun/demo.ts",
+    "demo:wasm": "bun run bindings/wasm/demo/run_all.ts",
+    "demo:py": "python bindings/python/demo/run_all.py",
+    "playground": "bun run bindings/wasm/playground/serve.ts",
     "copyright": "bun run scripts/add_copyright.ts"
   },
   "keywords": [

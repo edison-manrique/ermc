@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ERMC ⚡ Playground Científico WebAssembly</title>
+  <meta name="description" content="Playground interactivo en WebAssembly para ERMC (Exact Regression Mathematical Core): Descubrimiento de leyes físicas, curvas elípticas, aritmética modular, espacios de Hilbert y series de Ramanujan.">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="brand-wrapper">
+      <div class="brand-icon">E</div>
+      <div class="brand-title">
+        ERMC ⚡ Playground
+        <span class="badge" id="wasm-version-badge">v0.4.0 WASM</span>
+      </div>
+    </div>
+    <div class="header-status">
+      <div class="status-pill" id="wasm-status-pill">
+        <div class="status-dot" id="wasm-status-dot"></div>
+        <span id="wasm-status-text">Cargando WebAssembly...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="playground-container">
+
+    <!-- Tabs Bar -->
+    <nav class="tabs-nav" id="main-tabs" role="tablist">
+      <button class="tab-btn active" data-tab="tab-omniengine" id="tab-btn-omniengine">
+        <span>🔬</span> OmniEngine (Leyes Físicas)
+      </button>
+      <button class="tab-btn" data-tab="tab-modular" id="tab-btn-modular">
+        <span>🔢</span> Aritmética Modular $\mathbb{F}_p$
+      </button>
+      <button class="tab-btn" data-tab="tab-elliptic" id="tab-btn-elliptic">
+        <span>⚡</span> Curvas Elípticas & GLV
+      </button>
+      <button class="tab-btn" data-tab="tab-series" id="tab-btn-series">
+        <span>🌌</span> Ramanujan & Riemann
+      </button>
+      <button class="tab-btn" data-tab="tab-hilbert" id="tab-btn-hilbert">
+        <span>📐</span> Espacios de Hilbert & SVD
+      </button>
+      <button class="tab-btn" data-tab="tab-robust" id="tab-btn-robust">
+        <span>🛡️</span> Outliers & Precisión
+      </button>
+    </nav>
+
+    <!-- TAB 1: OMNIENGINE (Descubrimiento Simbólico) -->
+    <section class="tab-panel active" id="tab-omniengine">
+      <div class="grid-2col">
+        <!-- Controls -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">🔬 Descubrimiento de Leyes Físicas (SciML)</h2>
+            <span class="card-badge">SINDy / STLSQ</span>
+          </div>
+
+          <div class="form-group">
+            <label class="input-label" for="engine-preset-select">Seleccionar Sistema Físico / Experimento Teórico:</label>
+            <select id="engine-preset-select">
+              <option value="pendulum">Péndulo No Lineal con Arrastre Cuadrático: f(θ, ω) = -9.81·sin(x₀) - 0.5·x₁²</option>
+              <option value="snell">Óptica / Ley de Snell (Fracción exacta 4/3): f(θ) = (4/3)·sin(x₀)</option>
+              <option value="adiabatic">Termodinámica / Gas Monoatómico (Gamma 5/3): P(T, 1/V) = (5/3)·x₀·x₁</option>
+              <option value="torricelli">Hidrodinámica / Ley de Torricelli: v(h) = 4.4287·sqrt(x₀)</option>
+              <option value="hooke">Oscilador Armónico Amortiguado: f(x, v) = -10·x₀ - 0.3·x₁</option>
+            </select>
+          </div>
+
+          <div class="grid-2col" style="margin-bottom: 1rem;">
+            <div class="form-group">
+              <label class="input-label" for="engine-samples-input">Número de Muestras (N):</label>
+              <input type="number" id="engine-samples-input" value="100" min="20" max="1000">
+            </div>
+            <div class="form-group">
+              <label class="input-label" for="engine-noise-input">Ruido Gaussiano (σ):</label>
+              <input type="number" id="engine-noise-input" value="0.00" step="0.01" min="0" max="0.5">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="input-label" for="engine-lambda-input">Umbral de Esparsidad λ (STLSQ):</label>
+            <input type="number" id="engine-lambda-input" value="0.05" step="0.01" min="0.001" max="1.0">
+          </div>
+
+          <button class="btn btn-primary" id="engine-fit-btn" style="width: 100%;">
+            ⚡ Ejecutar Descubrimiento Simbólico en WASM
+          </button>
+        </div>
+
+        <!-- Visualizer & Output -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Ecuación Descubierta y Regresión</h3>
+            <span class="card-badge" id="engine-time-badge">0 μs</span>
+          </div>
+
+          <div class="result-box" id="engine-result-box">
+            <div style="color: var(--text-muted);">Presiona "Ejecutar Descubrimiento" para sintetizar la ley analítica.</div>
+          </div>
+
+          <div class="canvas-wrapper" style="margin-top: 1rem;">
+            <canvas class="interactive-canvas" id="engine-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: ARITMÉTICA MODULAR EN F_p -->
+    <section class="tab-panel" id="tab-modular">
+      <div class="grid-2col">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">🔢 Aritmética de Campos Finitos $\mathbb{F}_p$</h2>
+            <span class="card-badge">64-bit Modulo</span>
+          </div>
+
+          <div class="grid-3col">
+            <div class="form-group">
+              <label class="input-label" for="mod-a-input">Valor a:</label>
+              <input type="number" id="mod-a-input" value="42">
+            </div>
+            <div class="form-group">
+              <label class="input-label" for="mod-b-input">Valor b:</label>
+              <input type="number" id="mod-b-input" value="30">
+            </div>
+            <div class="form-group">
+              <label class="input-label" for="mod-p-input">Módulo Primo p:</label>
+              <input type="number" id="mod-p-input" value="1009">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="input-label" for="mod-exp-input">Exponente e (para potencias a^e mod p):</label>
+            <input type="number" id="mod-exp-input" value="1008">
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="btn btn-primary" id="mod-compute-btn">Calcular en $\mathbb{F}_p$</button>
+            <button class="btn btn-secondary" id="mod-fermat-btn">Verificar Teorema de Fermat</button>
+            <button class="btn btn-secondary" id="mod-tonelli-btn">Raíces Modulares (Tonelli-Shanks)</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Resultados de Aritmética Modular</h3>
+            <span class="card-badge" id="mod-time-badge">0 μs</span>
+          </div>
+          <div class="result-box" id="mod-result-box">
+            Presiona "Calcular en F_p" para inspeccionar suma, producto, inversos y residuos cuadráticos.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: CURVAS ELÍPTICAS & GLV -->
+    <section class="tab-panel" id="tab-elliptic">
+      <div class="grid-2col">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">⚡ Curvas Elípticas: $y^2 = x^3 + 7 \pmod p$</h2>
+            <span class="card-badge">Koblitz / secp256k1</span>
+          </div>
+
+          <div class="grid-2col">
+            <div class="form-group">
+              <label class="input-label" for="ec-p-input">Módulo Primo p:</label>
+              <input type="number" id="ec-p-input" value="1009">
+            </div>
+            <div class="form-group">
+              <label class="input-label" for="ec-scalar-k">Escalar k (para k·G):</label>
+              <input type="number" id="ec-scalar-k" value="7" min="1" max="1000">
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
+            <button class="btn btn-primary" id="ec-find-g-btn">Buscar Punto Generador G</button>
+            <button class="btn btn-secondary" id="ec-scalar-mul-btn">Multiplicar k·G</button>
+            <button class="btn btn-secondary" id="ec-glv-btn">Verificar Endomorfismo GLV</button>
+          </div>
+
+          <div class="result-box" id="ec-result-box">
+            Haz clic en "Buscar Punto Generador G" para inicializar la curva.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Retículo de Puntos en $\mathbb{F}_p$</h3>
+            <span class="card-badge" id="ec-time-badge">Visualizador</span>
+          </div>
+          <div class="canvas-wrapper">
+            <canvas class="interactive-canvas" id="ec-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: RAMANUJAN & RIEMANN -->
+    <section class="tab-panel" id="tab-series">
+      <div class="grid-2col">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">🌌 Ramanujan Mock Theta & Primos de Riemann</h2>
+            <span class="card-badge">Teoría Analítica</span>
+          </div>
+
+          <div class="form-group">
+            <label class="input-label" for="ramanujan-t-input">Parámetro t (Mock Theta f(-e^{-t}) con t → 0):</label>
+            <input type="number" id="ramanujan-t-input" value="0.05" step="0.01" min="0.001" max="1.0">
+          </div>
+
+          <div class="form-group">
+            <label class="input-label" for="riemann-x-input">Límite x para Contador de Primos π(x) vs Li(x):</label>
+            <input type="number" id="riemann-x-input" value="10000" step="500" min="10" max="80000">
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="btn btn-primary" id="series-eval-btn">Evaluar Ramanujan & Watson</button>
+            <button class="btn btn-secondary" id="series-primes-btn">Comparar π(x) vs Li(x)</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Convergencia Asintótica & Errores</h3>
+            <span class="card-badge" id="series-time-badge">0 μs</span>
+          </div>
+
+          <div class="result-box" id="series-result-box">
+            Presiona un botón para calcular en WebAssembly a precisión de 64 bits.
+          </div>
+
+          <div class="canvas-wrapper" style="margin-top: 1rem;">
+            <canvas class="interactive-canvas" id="series-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: HILBERT & SVD -->
+    <section class="tab-panel" id="tab-hilbert">
+      <div class="grid-2col">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">📐 Espacios de Hilbert $L^2$ & Descomposición SVD</h2>
+            <span class="card-badge">MGS-DGKS & Jacobi</span>
+          </div>
+
+          <div class="form-group">
+            <label class="input-label" for="hilbert-u-input">Vector u (elementos separados por comas):</label>
+            <input type="text" id="hilbert-u-input" value="1.0, 2.0, 3.0, 4.0">
+          </div>
+
+          <div class="form-group">
+            <label class="input-label" for="hilbert-v-input">Vector v (elementos separados por comas):</label>
+            <input type="text" id="hilbert-v-input" value="4.0, 3.0, 2.0, 1.0">
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem;">
+            <button class="btn btn-primary" id="hilbert-compute-btn">Calcular en Hilbert</button>
+            <button class="btn btn-secondary" id="svd-test-btn">Calcular SVD Matriz 4×3</button>
+          </div>
+
+          <div class="result-box" id="hilbert-result-box">
+            Ingresa vectores y calcula producto interno, normas, ángulo y Cauchy-Schwarz.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Espectro de Valores Singulares SVD</h3>
+            <span class="card-badge" id="svd-time-badge">SVD Jacobi</span>
+          </div>
+          <div class="canvas-wrapper">
+            <canvas class="interactive-canvas" id="svd-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 6: ROBUST STATS & PRECISION -->
+    <section class="tab-panel" id="tab-robust">
+      <div class="grid-2col">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">🛡️ Filtro Hampel Inmune a Outliers Extremos ($10^{100}$)</h2>
+            <span class="card-badge">MAD Normalizado</span>
+          </div>
+
+          <div class="form-group">
+            <label class="input-label" for="hampel-data-input">Datos con Outliers Inyectados:</label>
+            <textarea id="hampel-data-input" rows="3">2.71, 2.73, 1e100, 2.70, 2.72, -1e100, 2.69, 2.74, 2.71, 2.72</textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="input-label" for="hampel-k-input">Umbral k de Hampel (múltiplos de MAD):</label>
+            <input type="number" id="hampel-k-input" value="3.0" step="0.5" min="1.0" max="6.0">
+          </div>
+
+          <button class="btn btn-primary" id="hampel-run-btn" style="width: 100%;">
+            Filtrar Outliers y Compensar con Neumaier
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Comparación: Estimación Clásica vs ERMC</h3>
+            <span class="card-badge" id="hampel-time-badge">0 μs</span>
+          </div>
+
+          <div class="result-box" id="hampel-result-box">
+            Presiona el botón para observar cómo ERMC aísla outliers astronómicos sin desbordamiento.
+          </div>
+
+          <div class="canvas-wrapper" style="margin-top: 1rem;">
+            <canvas class="interactive-canvas" id="hampel-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Live Inspector Footer -->
+  <footer class="app-inspector">
+    <div class="log-stream">
+      <span class="log-tag">[ERMC-WASM]</span>
+      <span id="log-text">Núcleo WebAssembly listo para ejecución interactiva.</span>
+    </div>
+    <div id="inspector-runtime-info">Zig 0.16.0 | ReleaseFast | wasm32-freestanding</div>
+  </footer>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
