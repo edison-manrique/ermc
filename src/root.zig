@@ -148,9 +148,46 @@ pub const solver = struct {
 
 pub const series = struct {
     pub const sequence_ai = @import("series/sequence_ai.zig");
+    pub const asymptotics = @import("series/asymptotics.zig");
 
     pub const SequenceAi = sequence_ai.SequenceAi;
     pub const SequenceBasis = sequence_ai.SequenceBasis;
+    pub const evaluateMockThetaLogSpace = asymptotics.evaluateMockThetaLogSpace;
+    pub const ramanujanWatsonAsymptotic = asymptotics.ramanujanWatsonAsymptotic;
+    pub const sievePrimes = asymptotics.sievePrimes;
+    pub const primeCountPi = asymptotics.primeCountPi;
+    pub const logarithmicIntegralLi = asymptotics.logarithmicIntegralLi;
+};
+
+pub const modular = struct {
+    pub const arithmetic = @import("modular/arithmetic.zig");
+    pub const linear_solver = @import("modular/solver.zig");
+    pub const regression = @import("modular/regression.zig");
+
+    pub const addMod = arithmetic.addMod;
+    pub const subMod = arithmetic.subMod;
+    pub const mulMod = arithmetic.mulMod;
+    pub const divMod = arithmetic.divMod;
+    pub const modPow = arithmetic.modPow;
+    pub const modInverse = arithmetic.modInverse;
+    pub const legendreSymbol = arithmetic.legendreSymbol;
+    pub const isQuadraticResidue = arithmetic.isQuadraticResidue;
+    pub const sqrtMod = arithmetic.sqrtMod;
+    pub const findCubeRootOfUnity = arithmetic.findCubeRootOfUnity;
+    pub const solveModularLinearSystem = linear_solver.solveModularLinearSystem;
+    pub const fitModularRational = regression.fitModularRational;
+    pub const ModularRegressionResult = regression.ModularRegressionResult;
+    pub const ModularSample2D = regression.ModularSample2D;
+};
+
+pub const geometry = struct {
+    pub const point = @import("geometry/point.zig");
+    pub const curve = @import("geometry/curve.zig");
+    pub const glv = @import("geometry/glv.zig");
+
+    pub const Point = point.Point;
+    pub const EllipticCurve = curve.EllipticCurve;
+    pub const GlvEndomorphism = glv.GlvEndomorphism;
 };
 
 pub const engine = @import("engine.zig");
@@ -189,4 +226,12 @@ pub const fitKoopman = solver.koopman.fitKoopman;
 pub const KoopmanBasis = solver.koopman.KoopmanBasis;
 pub const KoopmanModel = solver.koopman.KoopmanModel;
 pub const KoopmanOptions = solver.koopman.KoopmanOptions;
+
+// Geometría y Aritmética Modular
+pub const Point = geometry.Point;
+pub const EllipticCurve = geometry.EllipticCurve;
+pub const GlvEndomorphism = geometry.GlvEndomorphism;
+pub const modInverse = modular.modInverse;
+pub const modPow = modular.modPow;
+
 

@@ -141,5 +141,40 @@ function loadNativeSymbols(path: string) {
       ],
       returns: FFIType.bool,
     },
+
+    // ── Aritmética Modular F_p (v0.4.0) ────────────────────────────────────
+    ermc_mod_add: { args: [FFIType.u64, FFIType.u64, FFIType.u64], returns: FFIType.u64 },
+    ermc_mod_sub: { args: [FFIType.u64, FFIType.u64, FFIType.u64], returns: FFIType.u64 },
+    ermc_mod_mul: { args: [FFIType.u64, FFIType.u64, FFIType.u64], returns: FFIType.u64 },
+    ermc_mod_pow: { args: [FFIType.u64, FFIType.u64, FFIType.u64], returns: FFIType.u64 },
+    ermc_mod_inverse: { args: [FFIType.u64, FFIType.u64], returns: FFIType.u64 },
+    ermc_mod_sqrt: { args: [FFIType.u64, FFIType.u64], returns: FFIType.u64 },
+
+    // ── Curvas Elípticas y²=x³+7 (mod p) (v0.4.0) ─────────────────────────
+    ermc_ec_is_on_curve: { args: [FFIType.u64, FFIType.u64, FFIType.u64], returns: FFIType.bool },
+    ermc_ec_add: {
+      args: [
+        FFIType.u64, FFIType.u64, // px, py
+        FFIType.u64, FFIType.u64, // qx, qy
+        FFIType.u64,               // p
+        FFIType.ptr, FFIType.ptr,  // out_x, out_y
+      ],
+      returns: FFIType.bool,
+    },
+    ermc_ec_scalar_mul: {
+      args: [
+        FFIType.u64,               // k
+        FFIType.u64, FFIType.u64,  // px, py
+        FFIType.u64,               // p
+        FFIType.ptr, FFIType.ptr,  // out_x, out_y
+      ],
+      returns: FFIType.bool,
+    },
+
+    // ── Ramanujan & Primos (v0.4.0) ─────────────────────────────────────────
+    ermc_ramanujan_mock_theta_ln:     { args: [FFIType.f64, FFIType.u64], returns: FFIType.f64 },
+    ermc_ramanujan_watson_asymptotic: { args: [FFIType.f64], returns: FFIType.f64 },
+    ermc_prime_count_pi:              { args: [FFIType.f64, FFIType.u64], returns: FFIType.u64 },
+    ermc_logarithmic_integral_li:     { args: [FFIType.f64], returns: FFIType.f64 },
   });
 }

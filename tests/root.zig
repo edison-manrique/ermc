@@ -31,4 +31,7 @@ test {
     _ = @import("koopman_test.zig");
     _ = @import("autodiff_test.zig");
     _ = @import("series_test.zig");
+    _ = @import("modular_test.zig");
+    _ = @import("elliptic_test.zig");
+    _ = @import("asymptotics_test.zig");
 }

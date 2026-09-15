@@ -24,6 +24,9 @@ from .svd import SVD
 from .sequence import SequenceAI
 from .dmd import DMD
 from .chaos import Chaos
+from .modular import Modular
+from .elliptic import EllipticCurve, EcPoint
+from .series import AnalyticSeries
 
 __version__ = get_version()
 __all__ = [
@@ -42,4 +45,9 @@ __all__ = [
     "SequenceAI",
     "DMD",
     "Chaos",
+    "Modular",
+    "EllipticCurve",
+    "EcPoint",
+    "AnalyticSeries",
 ]
+

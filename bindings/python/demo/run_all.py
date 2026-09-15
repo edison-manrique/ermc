@@ -17,14 +17,17 @@ if sys.stdout.encoding != "utf-8":
 DEMO_DIR = os.path.dirname(os.path.abspath(__file__))
 
 DEMOS = [
-    ("01_hilbert.py",  "Espacios de Hilbert y Ortogonalidad"),
-    ("02_precision.py","Aritmetica Compensada (Neumaier)"),
-    ("03_outliers.py", "Deteccion Robusta de Outliers"),
-    ("04_sequence.py", "IA de Sucesiones Matematicas"),
-    ("05_svd.py",      "SVD - Valores Singulares"),
-    ("06_engine.py",   "OmniEngine - Descubrimiento de Leyes"),
-    ("07_dmd.py",      "DMD - Modos Dinamicos"),
-    ("08_chaos.py",    "Dinamica de Caos y Lyapunov"),
+    ("01_hilbert.py",   "Espacios de Hilbert y Ortogonalidad"),
+    ("02_precision.py", "Aritmetica Compensada (Neumaier)"),
+    ("03_outliers.py",  "Deteccion Robusta de Outliers"),
+    ("04_sequence.py",  "IA de Sucesiones Matematicas"),
+    ("05_svd.py",       "SVD - Valores Singulares"),
+    ("06_engine.py",    "OmniEngine - Descubrimiento de Leyes"),
+    ("07_dmd.py",       "DMD - Modos Dinamicos"),
+    ("08_chaos.py",     "Dinamica de Caos y Lyapunov"),
+    ("09_modular.py",   "Aritmética Modular en F_p"),
+    ("10_elliptic.py",  "Curvas Elípticas y²=x³+7 & GLV"),
+    ("11_series.py",    "Mock Theta Ramanujan & Distribución de Primos"),
 ]
 
 # Filtrar si se pasan IDs por argumento

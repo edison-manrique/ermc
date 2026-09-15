@@ -21,6 +21,9 @@ const DEMOS: Array<[string, string]> = [
   ["06_engine.ts",    "OmniEngine - Descubrimiento de Leyes Físicas"],
   ["07_dmd.ts",       "DMD - Modos Dinámicos Dominantes"],
   ["08_chaos.ts",     "Dinámica de Caos y Lyapunov (Lorenz)"],
+  ["09_modular.ts",   "Aritmética Modular en F_p"],
+  ["10_elliptic.ts",  "Curvas Elípticas y²=x³+7 & GLV"],
+  ["11_series.ts",    "Mock Theta Ramanujan & Distribución de Primos"],
 ];
 
 const selected = process.argv.slice(2);

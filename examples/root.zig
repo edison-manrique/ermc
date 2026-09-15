@@ -23,6 +23,8 @@ pub const ex09 = @import("09_extreme_outliers.zig");
 pub const ex10 = @import("10_svd_pinv.zig");
 pub const ex11 = @import("11_dmd_wave.zig");
 pub const ex12 = @import("12_chaos_lyapunov.zig");
+pub const ex13 = @import("13_elliptic_glv.zig");
+pub const ex14 = @import("14_ramanujan_primes.zig");
 
 pub fn main(init: std.process.Init) !void {
     const io = init.io;
@@ -33,7 +35,7 @@ pub fn main(init: std.process.Init) !void {
 
     std.debug.print("\n=========================================================================\n", .{});
     std.debug.print("  ERMC: MOTOR DE IA MATEMÁTICA Y DESCUBRIMIENTO SIMBÓLICO EN ZIG\n", .{});
-    std.debug.print("  Versión 0.3.0 | SciML, Espacios de Hilbert, SVD, DMD, AutoDiff y Caos\n", .{});
+    std.debug.print("  v0.4.0 | SciML, Hilbert, SVD, DMD, AutoDiff, Caos, Curvas Elípticas & Primos\n", .{});
     std.debug.print("=========================================================================\n\n", .{});
 
     const start_total = std.Io.Clock.awake.now(io);
@@ -50,11 +52,13 @@ pub fn main(init: std.process.Init) !void {
     try ex10.run(allocator, io);
     try ex11.run(allocator, io);
     try ex12.run(allocator, io);
+    try ex13.run(allocator, io);
+    try ex14.run(allocator, io);
 
     const dur_total = start_total.untilNow(io, .awake);
     const total_time_ms = @as(f64, @floatFromInt(dur_total.toNanoseconds())) / 1_000_000.0;
 
     std.debug.print("=========================================================================\n", .{});
-    std.debug.print(" >> Suite completa de descubrimiento y SciML ejecutada en: {d:.3} ms ({f})\n", .{ total_time_ms, dur_total });
+    std.debug.print(" >> Suite completa (14 ejemplos): Mecánica, SciML, Caos, Curvas Elípticas, Primos | {d:.3} ms ({f})\n", .{ total_time_ms, dur_total });
     std.debug.print("=========================================================================\n\n", .{});
 }

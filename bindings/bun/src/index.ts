@@ -20,6 +20,10 @@ export * from "./svd";
 export * from "./sequence";
 export * from "./dmd";
 export * from "./chaos";
+// v0.4.0 — Matemáticas Modulares, Curvas Elípticas & Series Analíticas
+export * from "./modular";
+export * from "./elliptic";
+export * from "./series";
 
 import { getNativeLib } from "./ffi";
 

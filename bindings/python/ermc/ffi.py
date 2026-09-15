@@ -209,7 +209,65 @@ def load_native_library(custom_path: Optional[str] = None) -> ctypes.CDLL:
     ]
     lib.ermc_chaos_lorenz.restype = ctypes.c_bool
 
+    # Aritmética Modular en F_p (v0.4.0)
+    lib.ermc_mod_add.argtypes = [ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint64]
+    lib.ermc_mod_add.restype = ctypes.c_uint64
+
+    lib.ermc_mod_sub.argtypes = [ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint64]
+    lib.ermc_mod_sub.restype = ctypes.c_uint64
+
+    lib.ermc_mod_mul.argtypes = [ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint64]
+    lib.ermc_mod_mul.restype = ctypes.c_uint64
+
+    lib.ermc_mod_pow.argtypes = [ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint64]
+    lib.ermc_mod_pow.restype = ctypes.c_uint64
+
+    lib.ermc_mod_inverse.argtypes = [ctypes.c_uint64, ctypes.c_uint64]
+    lib.ermc_mod_inverse.restype = ctypes.c_uint64
+
+    lib.ermc_mod_sqrt.argtypes = [ctypes.c_uint64, ctypes.c_uint64]
+    lib.ermc_mod_sqrt.restype = ctypes.c_uint64
+
+    # Curvas Elípticas (v0.4.0)
+    lib.ermc_ec_is_on_curve.argtypes = [ctypes.c_uint64, ctypes.c_uint64, ctypes.c_uint64]
+    lib.ermc_ec_is_on_curve.restype = ctypes.c_bool
+
+    lib.ermc_ec_add.argtypes = [
+        ctypes.c_uint64,
+        ctypes.c_uint64,
+        ctypes.c_uint64,
+        ctypes.c_uint64,
+        ctypes.c_uint64,
+        ctypes.POINTER(ctypes.c_uint64),
+        ctypes.POINTER(ctypes.c_uint64),
+    ]
+    lib.ermc_ec_add.restype = ctypes.c_bool
+
+    lib.ermc_ec_scalar_mul.argtypes = [
+        ctypes.c_uint64,
+        ctypes.c_uint64,
+        ctypes.c_uint64,
+        ctypes.c_uint64,
+        ctypes.POINTER(ctypes.c_uint64),
+        ctypes.POINTER(ctypes.c_uint64),
+    ]
+    lib.ermc_ec_scalar_mul.restype = ctypes.c_bool
+
+    # Series Analíticas (v0.4.0)
+    lib.ermc_ramanujan_mock_theta_ln.argtypes = [ctypes.c_double, ctypes.c_size_t]
+    lib.ermc_ramanujan_mock_theta_ln.restype = ctypes.c_double
+
+    lib.ermc_ramanujan_watson_asymptotic.argtypes = [ctypes.c_double]
+    lib.ermc_ramanujan_watson_asymptotic.restype = ctypes.c_double
+
+    lib.ermc_prime_count_pi.argtypes = [ctypes.c_double, ctypes.c_size_t]
+    lib.ermc_prime_count_pi.restype = ctypes.c_size_t
+
+    lib.ermc_logarithmic_integral_li.argtypes = [ctypes.c_double]
+    lib.ermc_logarithmic_integral_li.restype = ctypes.c_double
+
     return lib
+
 
 
 def get_lib(custom_path: Optional[str] = None) -> ctypes.CDLL:

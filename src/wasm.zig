@@ -21,7 +21,7 @@ const allocator = std.heap.wasm_allocator;
 // ===========================================================================
 
 export fn ermc_version_wasm(out_buf: [*]u8, max_len: usize) usize {
-    const ver = "0.3.0";
+    const ver = "0.4.0";
     const copy_len = @min(ver.len, max_len - 1);
     @memcpy(out_buf[0..copy_len], ver[0..copy_len]);
     out_buf[copy_len] = 0;
@@ -327,3 +327,108 @@ export fn ermc_free(ptr: u32, n_bytes: usize) void {
     const slice: []u8 = @as([*]u8, @ptrFromInt(ptr))[0..n_bytes];
     allocator.free(slice);
 }
+
+// ===========================================================================
+// ARITMÉTICA MODULAR EN F_p (Nuevo en v0.4.0)
+// ===========================================================================
+
+export fn ermc_mod_add(a: u64, b: u64, p: u64) u64 {
+    return root.modular.addMod(a, b, p);
+}
+
+export fn ermc_mod_sub(a: u64, b: u64, p: u64) u64 {
+    return root.modular.subMod(a, b, p);
+}
+
+export fn ermc_mod_mul(a: u64, b: u64, p: u64) u64 {
+    return root.modular.mulMod(a, b, p);
+}
+
+export fn ermc_mod_pow(base: u64, exp: u64, p: u64) u64 {
+    return root.modular.modPow(base, exp, p);
+}
+
+/// Retorna inverso modular o u64_MAX si no existe
+export fn ermc_mod_inverse(a: u64, p: u64) u64 {
+    return root.modular.modInverse(a, p) orelse std.math.maxInt(u64);
+}
+
+/// Retorna raíz cuadrada mod p, o u64_MAX si a no es residuo cuadrático
+export fn ermc_mod_sqrt(a: u64, p: u64) u64 {
+    return root.modular.sqrtMod(a, p) orelse std.math.maxInt(u64);
+}
+
+// ===========================================================================
+// CURVAS ELÍPTICAS: y² = x³ + 7 (mod p) — secp256k1 reducida (v0.4.0)
+// ===========================================================================
+
+/// 1 si (x, y) está en la curva y² = x³ + 7 (mod p), 0 si no
+export fn ermc_ec_is_on_curve(x: u64, y: u64, p: u64) u32 {
+    const curve = root.EllipticCurve.initKoblitz(p) catch return 0;
+    const pt = root.Point.affine(x, y);
+    return if (curve.isOnCurve(pt)) 1 else 0;
+}
+
+/// Suma de puntos P + Q. Resultado escrito en out_ptr (2 × u64 = 16 bytes).
+/// Devuelve 1 en éxito, 0 en error.
+export fn ermc_ec_add(
+    px: u64, py: u64,
+    qx: u64, qy: u64,
+    p: u64,
+    out_ptr: u32,
+) u32 {
+    if (out_ptr == 0) return 0;
+    const curve = root.EllipticCurve.initKoblitz(p) catch return 0;
+    const P = root.Point.affine(px, py);
+    const Q = root.Point.affine(qx, qy);
+    const result = curve.add(P, Q);
+    const out: *[2]u64 = @ptrFromInt(out_ptr);
+    out[0] = if (result.isInfinity()) 0 else result.x;
+    out[1] = if (result.isInfinity()) 0 else result.y;
+    return 1;
+}
+
+/// Multiplicación escalar k·P. Resultado en out_ptr (2 × u64 = 16 bytes).
+export fn ermc_ec_scalar_mul(
+    k: u64,
+    px: u64, py: u64,
+    p: u64,
+    out_ptr: u32,
+) u32 {
+    if (out_ptr == 0) return 0;
+    const curve = root.EllipticCurve.initKoblitz(p) catch return 0;
+    const P = root.Point.affine(px, py);
+    const result = curve.scalarMul(k, P);
+    const out: *[2]u64 = @ptrFromInt(out_ptr);
+    out[0] = if (result.isInfinity()) 0 else result.x;
+    out[1] = if (result.isInfinity()) 0 else result.y;
+    return 1;
+}
+
+// ===========================================================================
+// SERIES ANALÍTICAS: RAMANUJAN Y PRIMOS (v0.4.0)
+// ===========================================================================
+
+/// ln|f(-e^{-t})| de la Mock Theta Function de Ramanujan
+export fn ermc_ramanujan_mock_theta_ln(t: f64, max_terms: usize) f64 {
+    const val = root.series.evaluateMockThetaLogSpace(t, max_terms);
+    return @log(@abs(val));
+}
+
+/// Asintótica de Ramanujan-Watson: π²/(24t) - ½·ln(t) + ½·ln(π)
+export fn ermc_ramanujan_watson_asymptotic(t: f64) f64 {
+    return root.series.ramanujanWatsonAsymptotic(t);
+}
+
+/// Número exacto de primos ≤ x (criba hasta max_n)
+export fn ermc_prime_count_pi(x: f64, max_n: usize) usize {
+    const primes = root.series.sievePrimes(allocator, max_n) catch return 0;
+    defer allocator.free(primes);
+    return root.series.primeCountPi(primes, x);
+}
+
+/// Integral logarítmica Li(x) — aproximación de Riemann para π(x)
+export fn ermc_logarithmic_integral_li(x: f64) f64 {
+    return root.series.logarithmicIntegralLi(x);
+}
+

@@ -21,12 +21,16 @@ const DEMOS: Array<[string, string]> = [
   ["06_engine.ts",   "OmniEngine - Descubrimiento de Leyes"],
   ["07_dmd.ts",      "DMD - Modos Dinámicos"],
   ["08_chaos.ts",    "Dinámica de Caos y Lyapunov"],
+  // v0.4.0 — Matemáticas Modulares, Curvas Elípticas & Series
+  ["09_modular.ts",  "Aritmética Modular en F_p"],
+  ["10_elliptic.ts", "Curvas Elípticas y²=x³+7 & GLV"],
+  ["11_series.ts",   "Mock Theta Ramanujan & Distribución de Primos"],
 ];
 
 const selected = process.argv.slice(2);
 
 console.log("=".repeat(65));
-console.log("  ERMC | Suite de Demos Modulares Bun/TypeScript");
+console.log("  ERMC v0.4.0 | Suite de Demos Modulares Bun/TypeScript");
 const total = selected.length > 0 ? selected.length : DEMOS.length;
 console.log(`  Ejecutando ${total} de ${DEMOS.length} demos`);
 console.log("=".repeat(65) + "\n");

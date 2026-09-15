@@ -19,7 +19,7 @@ const allocator = std.heap.page_allocator;
 // ===========================================================================
 
 export fn ermc_version() callconv(.c) [*:0]const u8 {
-    return "0.3.0";
+    return "0.4.0";
 }
 
 // ===========================================================================
@@ -324,3 +324,114 @@ export fn ermc_chaos_lorenz(
     out_horizon.* = res.lyapunov_time;
     return true;
 }
+
+// ===========================================================================
+// ARITMÉTICA MODULAR EN F_p (Nuevo en v0.4.0)
+// ===========================================================================
+
+export fn ermc_mod_add(a: u64, b: u64, p: u64) callconv(.c) u64 {
+    return root.modular.addMod(a, b, p);
+}
+
+export fn ermc_mod_sub(a: u64, b: u64, p: u64) callconv(.c) u64 {
+    return root.modular.subMod(a, b, p);
+}
+
+export fn ermc_mod_mul(a: u64, b: u64, p: u64) callconv(.c) u64 {
+    return root.modular.mulMod(a, b, p);
+}
+
+export fn ermc_mod_pow(base: u64, exp: u64, p: u64) callconv(.c) u64 {
+    return root.modular.modPow(base, exp, p);
+}
+
+/// Retorna el inverso modular de a mod p, o u64_MAX si no existe
+export fn ermc_mod_inverse(a: u64, p: u64) callconv(.c) u64 {
+    return root.modular.modInverse(a, p) orelse std.math.maxInt(u64);
+}
+
+/// Retorna la raíz cuadrada de a mod p, o u64_MAX si a no es residuo cuadrático
+export fn ermc_mod_sqrt(a: u64, p: u64) callconv(.c) u64 {
+    return root.modular.sqrtMod(a, p) orelse std.math.maxInt(u64);
+}
+
+// ===========================================================================
+// CURVAS ELÍPTICAS: y² = x³ + 7 (mod p) — Koblitz / secp256k1 reducida (v0.4.0)
+// ===========================================================================
+
+/// Verifica si (x, y) pertenece a la curva y² = x³ + 7 (mod p)
+export fn ermc_ec_is_on_curve(x: u64, y: u64, p: u64) callconv(.c) bool {
+    const curve = root.EllipticCurve.initKoblitz(p) catch return false;
+    const pt = root.Point.affine(x, y);
+    return curve.isOnCurve(pt);
+}
+
+/// Suma de puntos P + Q en la curva y² = x³ + 7 (mod p)
+/// Retorna el resultado en (out_x, out_y); si el resultado es infinito, out_x = out_y = 0
+export fn ermc_ec_add(
+    px: u64, py: u64,
+    qx: u64, qy: u64,
+    p: u64,
+    out_x: *u64, out_y: *u64,
+) callconv(.c) bool {
+    const curve = root.EllipticCurve.initKoblitz(p) catch return false;
+    const P = root.Point.affine(px, py);
+    const Q = root.Point.affine(qx, qy);
+    const result = curve.add(P, Q);
+    if (result.isInfinity()) {
+        out_x.* = 0;
+        out_y.* = 0;
+    } else {
+        out_x.* = result.x;
+        out_y.* = result.y;
+    }
+    return true;
+}
+
+/// Multiplicación escalar k·P en la curva y² = x³ + 7 (mod p)
+export fn ermc_ec_scalar_mul(
+    k: u64,
+    px: u64, py: u64,
+    p: u64,
+    out_x: *u64, out_y: *u64,
+) callconv(.c) bool {
+    const curve = root.EllipticCurve.initKoblitz(p) catch return false;
+    const P = root.Point.affine(px, py);
+    const result = curve.scalarMul(k, P);
+    if (result.isInfinity()) {
+        out_x.* = 0;
+        out_y.* = 0;
+    } else {
+        out_x.* = result.x;
+        out_y.* = result.y;
+    }
+    return true;
+}
+
+// ===========================================================================
+// SERIES ANALÍTICAS: RAMANUJAN Y DISTRIBUCIÓN DE PRIMOS (v0.4.0)
+// ===========================================================================
+
+/// Evalúa ln|f(-e^{-t})| de la Mock Theta Function de Ramanujan (orden 3)
+export fn ermc_ramanujan_mock_theta_ln(t: f64, max_terms: usize) callconv(.c) f64 {
+    const val = root.series.evaluateMockThetaLogSpace(t, max_terms);
+    return @log(@abs(val));
+}
+
+/// Predicción asintótica de Ramanujan-Watson: π²/(24t) - ½·ln(t) + ½·ln(π)
+export fn ermc_ramanujan_watson_asymptotic(t: f64) callconv(.c) f64 {
+    return root.series.ramanujanWatsonAsymptotic(t);
+}
+
+/// Número exacto de primos ≤ x (requiere primos hasta max_n precalculados)
+export fn ermc_prime_count_pi(x: f64, max_n: usize) callconv(.c) usize {
+    const primes = root.series.sievePrimes(allocator, max_n) catch return 0;
+    defer allocator.free(primes);
+    return root.series.primeCountPi(primes, x);
+}
+
+/// Aproximación Li(x) de la integral logarítmica (Riemann)
+export fn ermc_logarithmic_integral_li(x: f64) callconv(.c) f64 {
+    return root.series.logarithmicIntegralLi(x);
+}
+
