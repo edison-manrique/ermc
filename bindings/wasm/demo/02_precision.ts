@@ -4,7 +4,7 @@
  *
  * demo/02_precision.ts — Aritmética Compensada Neumaier (WASM)
  */
-import { loadErmc, Precision } from "../ermc_wasm";
+import { loadErmc, Precision } from "../src/index";
 
 await loadErmc();
 

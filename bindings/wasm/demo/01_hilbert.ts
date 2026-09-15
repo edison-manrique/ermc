@@ -4,7 +4,7 @@
  *
  * demo/01_hilbert.ts — Espacios de Hilbert y Ortogonalidad (WASM)
  */
-import { loadErmc, HilbertSpace } from "../ermc_wasm";
+import { loadErmc, HilbertSpace } from "../src/index";
 
 await loadErmc();
 

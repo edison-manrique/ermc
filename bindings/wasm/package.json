@@ -1,11 +1,12 @@
 {
   "name": "@ermc/wasm",
   "version": "0.3.0",
-  "description": "ERMC WebAssembly bindings for browsers and JavaScript runtimes",
-  "type": "module",
-  "main": "ermc_wasm.ts",
+  "description": "Exact Regression Mathematical Core (ERMC) TypeScript/WASM bindings powered by high-performance Zig WebAssembly",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
   "scripts": {
-    "demo": "bun run demo/run_all.ts",
+    "demo": "bun run demo.ts",
+    "demo:all": "bun run demo/run_all.ts",
     "demo:01": "bun run demo/01_hilbert.ts",
     "demo:02": "bun run demo/02_precision.ts",
     "demo:03": "bun run demo/03_outliers.ts",
@@ -14,5 +15,8 @@
     "demo:06": "bun run demo/06_engine.ts",
     "demo:07": "bun run demo/07_dmd.ts",
     "demo:08": "bun run demo/08_chaos.ts"
-  }
+  },
+  "keywords": ["math", "machine-learning", "sciml", "symbolic-regression", "hilbert-spaces", "zig", "wasm", "webassembly", "bun"],
+  "author": "Edison Manrique Chocce",
+  "license": "AGPL-3.0-or-later"
 }

@@ -4,7 +4,7 @@
  *
  * demo/03_outliers.ts — Detección Robusta de Outliers Hampel (WASM)
  */
-import { loadErmc, Outliers } from "../ermc_wasm";
+import { loadErmc, Outliers } from "../src/index";
 
 await loadErmc();
 

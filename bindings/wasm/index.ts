@@ -6,4 +6,4 @@
  *
  * ERMC (Exact Regression Mathematical Core) — WebAssembly Entry Point
  */
-export * from "./ermc_wasm";
+export * from "./src/index";

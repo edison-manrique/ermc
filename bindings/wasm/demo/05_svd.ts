@@ -4,7 +4,7 @@
  *
  * demo/05_svd.ts — SVD: Valores Singulares y Rango Efectivo (WASM)
  */
-import { loadErmc, SVD } from "../ermc_wasm";
+import { loadErmc, SVD } from "../src/index";
 
 await loadErmc();
 

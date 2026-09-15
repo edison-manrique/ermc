@@ -4,7 +4,7 @@
  *
  * demo/07_dmd.ts — Dynamic Mode Decomposition (WASM)
  */
-import { loadErmc, DMD } from "../ermc_wasm";
+import { loadErmc, DMD } from "../src/index";
 
 await loadErmc();
 

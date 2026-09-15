@@ -4,7 +4,7 @@
  *
  * demo/04_sequence.ts — IA de Sucesiones Matemáticas (WASM)
  */
-import { loadErmc, SequenceAI } from "../ermc_wasm";
+import { loadErmc, SequenceAI } from "../src/index";
 
 await loadErmc();
 

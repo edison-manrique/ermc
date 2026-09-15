@@ -3,7 +3,10 @@
  * Todos los derechos reservados.
  * Licencia Dual: AGPL-3.0 para uso académico/personal | Licencia Comercial requerida para uso propietario.
  * Ver archivo LICENSE en la raíz del proyecto para términos completos.
- *
- * Re-exportación retrocompatible para bindings/wasm/ermc_wasm.ts
+ */
+
+/**
+ * ERMC (Exact Regression Mathematical Core)
+ * Punto de entrada TypeScript para WebAssembly
  */
 export * from "./src/index";

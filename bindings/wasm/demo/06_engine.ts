@@ -4,7 +4,7 @@
  *
  * demo/06_engine.ts — OmniEngine: Descubrimiento Simbólico de Leyes Físicas (WASM)
  */
-import { loadErmc, OmniEngine, Activation } from "../ermc_wasm";
+import { loadErmc, OmniEngine, Activation } from "../src/index";
 
 await loadErmc();
 

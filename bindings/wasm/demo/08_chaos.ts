@@ -4,7 +4,7 @@
  *
  * demo/08_chaos.ts — Dinámica de Caos y Exponente de Lyapunov (WASM)
  */
-import { loadErmc, Chaos } from "../ermc_wasm";
+import { loadErmc, Chaos } from "../src/index";
 
 await loadErmc();
 
