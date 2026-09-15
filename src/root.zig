@@ -87,6 +87,7 @@ pub const symbolic = struct {
     pub const dictionary = @import("symbolic/dictionary.zig");
     pub const snapping = @import("symbolic/snapping.zig");
     pub const formatter = @import("symbolic/formatter.zig");
+    pub const orthogonal = @import("symbolic/orthogonal.zig");
 
     pub const ExpansionDictionary = dictionary.ExpansionDictionary;
     pub const snapToPhysicalConstantScaleInvariant = snapping.snapToPhysicalConstantScaleInvariant;
@@ -147,6 +148,7 @@ pub const OmniEngine = engine.OmniEngine;
 pub const Activation = core.Activation;
 pub const Sample = core.Sample;
 pub const SolveOptions = core.SolveOptions;
+pub const ErmcError = core.ErmcError;
 pub const MathMlError = core.MathMlError;
 pub const OmniRng = core.OmniRng;
 pub const SequenceAi = series.SequenceAi;
@@ -155,4 +157,6 @@ pub const Dual = autodiff.Dual;
 pub const SvdResult = linalg.SvdResult;
 pub const DmdResult = solver.DmdResult;
 pub const OutlierResult = stats.OutlierResult;
+pub const orthogonal = symbolic.orthogonal;
+pub const OrthogonalFamily = symbolic.OrthogonalFamily;
 

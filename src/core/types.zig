@@ -62,8 +62,8 @@ pub const SolveOptions = struct {
     snap_constants: bool = true,
 };
 
-/// Errores específicos del motor matemático y de aprendizaje
-pub const MathMlError = error{
+/// Errores específicos del motor matemático ERMC y de aprendizaje
+pub const ErmcError = error{
     SingularMatrix,
     EmptyDataset,
     DimensionMismatch,
@@ -71,3 +71,6 @@ pub const MathMlError = error{
     ConvergenceFailure,
     OutOfMemory,
 };
+
+/// Alias de compatibilidad
+pub const MathMlError = ErmcError;
