@@ -25,6 +25,7 @@ test {
     _ = @import("symbolic_test.zig");
     _ = @import("orthogonal_test.zig");
     _ = @import("solver_test.zig");
+    _ = @import("symplectic_test.zig");
     _ = @import("autodiff_test.zig");
     _ = @import("series_test.zig");
 }

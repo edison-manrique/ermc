@@ -132,6 +132,9 @@ pub const solver = struct {
     pub const computeMaxLyapunovExponent = chaos.computeMaxLyapunovExponent;
     pub const ChaosAnalysisResult = chaos.ChaosAnalysisResult;
     pub const ChaosClassification = chaos.ChaosClassification;
+
+    // Integradores Simplécticos (Hamiltoniano)
+    pub const symplectic = @import("solver/symplectic.zig");
 };
 
 pub const series = struct {
@@ -159,4 +162,8 @@ pub const DmdResult = solver.DmdResult;
 pub const OutlierResult = stats.OutlierResult;
 pub const orthogonal = symbolic.orthogonal;
 pub const OrthogonalFamily = symbolic.OrthogonalFamily;
+pub const symplectic = solver.symplectic;
+pub const SymplecticAlgorithm = solver.symplectic.SymplecticAlgorithm;
+pub const SymplecticResult = solver.symplectic.SymplecticResult;
+pub const integrateSymplectic = solver.symplectic.integrateSymplectic;
 
