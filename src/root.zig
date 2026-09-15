@@ -138,6 +138,9 @@ pub const solver = struct {
 
     // Optimización No Lineal (Levenberg-Marquardt)
     pub const levenberg_marquardt = @import("solver/levenberg_marquardt.zig");
+
+    // Descubrimiento Espacio-Temporal PDE-FIND
+    pub const pdefind = @import("solver/pdefind.zig");
 };
 
 pub const series = struct {
@@ -173,4 +176,9 @@ pub const lm = solver.levenberg_marquardt;
 pub const minimizeLm = solver.levenberg_marquardt.minimizeLm;
 pub const LmOptions = solver.levenberg_marquardt.LmOptions;
 pub const LmResult = solver.levenberg_marquardt.LmResult;
+pub const pdefind = solver.pdefind;
+pub const findPde = solver.pdefind.findPde;
+pub const PdeFindOptions = solver.pdefind.PdeFindOptions;
+pub const PdeFindResult = solver.pdefind.PdeFindResult;
+pub const PdeTerm = solver.pdefind.PdeTerm;
 
