@@ -28,6 +28,7 @@ test {
     _ = @import("symplectic_test.zig");
     _ = @import("levenberg_marquardt_test.zig");
     _ = @import("pdefind_test.zig");
+    _ = @import("koopman_test.zig");
     _ = @import("autodiff_test.zig");
     _ = @import("series_test.zig");
 }

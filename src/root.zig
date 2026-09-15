@@ -141,6 +141,9 @@ pub const solver = struct {
 
     // Descubrimiento Espacio-Temporal PDE-FIND
     pub const pdefind = @import("solver/pdefind.zig");
+
+    // Operadores de Koopman y EDMD
+    pub const koopman = @import("solver/koopman.zig");
 };
 
 pub const series = struct {
@@ -181,4 +184,9 @@ pub const findPde = solver.pdefind.findPde;
 pub const PdeFindOptions = solver.pdefind.PdeFindOptions;
 pub const PdeFindResult = solver.pdefind.PdeFindResult;
 pub const PdeTerm = solver.pdefind.PdeTerm;
+pub const koopman = solver.koopman;
+pub const fitKoopman = solver.koopman.fitKoopman;
+pub const KoopmanBasis = solver.koopman.KoopmanBasis;
+pub const KoopmanModel = solver.koopman.KoopmanModel;
+pub const KoopmanOptions = solver.koopman.KoopmanOptions;
 
