@@ -3,7 +3,7 @@
 // Licencia Dual: AGPL-3.0 para uso académico/personal | Licencia Comercial requerida para uso propietario.
 // Ver archivo LICENSE en la raíz del proyecto para términos completos.
 
-//! math-ml: Motor Modular de Inteligencia Artificial Matemática y Simbólica en Zig 0.16.0
+//! ERMC: Motor Modular de Inteligencia Artificial Matemática y Simbólica en Zig 0.16.0
 //! Inspirado en Omni-Core (SciML / SINDy / Regresión Simbólica de Alta Precisión).
 //! v2: Métricas, Integrador ODE, IRLS integrado, optimizaciones SIMD y Gram unificada.
 

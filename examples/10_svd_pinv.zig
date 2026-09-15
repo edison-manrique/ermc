@@ -4,10 +4,10 @@
 // Ver archivo LICENSE en la raíz del proyecto para términos completos.
 
 const std = @import("std");
-const math_ml = @import("math-ml");
+const ermc = @import("ermc");
 
-const DenseMatrix = math_ml.DenseMatrix;
-const svd = math_ml.linalg.svd;
+const DenseMatrix = ermc.DenseMatrix;
+const svd = ermc.linalg.svd;
 
 /// [EJEMPLO 10] SVD: RECONSTRUCCIÓN ÓPTIMA Y PSEUDOINVERSA DE MOORE-PENROSE
 pub fn run(allocator: std.mem.Allocator, io: anytype) !void {

@@ -3,7 +3,7 @@
 // Licencia Dual: AGPL-3.0 para uso académico/personal | Licencia Comercial requerida para uso propietario.
 // Ver archivo LICENSE en la raíz del proyecto para términos completos.
 
-//! math-ml: Suite Modular de Ejemplos y Descubrimiento Físico/SciML
+//! ERMC: Suite Modular de Ejemplos y Descubrimiento Físico/SciML
 //!
 //! Permite ejecutar la suite completa de demostraciones o invocar ejemplos individuales:
 //! `zig build run` -> Ejecuta los 12 ejemplos en secuencia
@@ -32,7 +32,7 @@ pub fn main(init: std.process.Init) !void {
     const allocator = gpa.allocator();
 
     std.debug.print("\n=========================================================================\n", .{});
-    std.debug.print("  MATH-ML: MOTOR DE IA MATEMÁTICA Y DESCUBRIMIENTO SIMBÓLICO EN ZIG\n", .{});
+    std.debug.print("  ERMC: MOTOR DE IA MATEMÁTICA Y DESCUBRIMIENTO SIMBÓLICO EN ZIG\n", .{});
     std.debug.print("  Versión 0.3.0 | SciML, Espacios de Hilbert, SVD, DMD, AutoDiff y Caos\n", .{});
     std.debug.print("=========================================================================\n\n", .{});
 

@@ -5,11 +5,11 @@
 
 const std = @import("std");
 const testing = std.testing;
-const math_ml = @import("math-ml");
+const ermc = @import("ermc");
 
-const OmniRng = math_ml.core.rng.OmniRng;
-const simd = math_ml.core.simd;
-const precision = math_ml.core.precision;
+const OmniRng = ermc.core.rng.OmniRng;
+const simd = ermc.core.simd;
+const precision = ermc.core.precision;
 
 // ===========================================================================
 // CORE: RNG

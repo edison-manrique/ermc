@@ -26,7 +26,7 @@ export class Chaos {
     const lyapBuf = new Float64Array(1);
     const horizonBuf = new Float64Array(1);
     const lib = getNativeLib(customPath);
-    const ok = lib.symbols.math_ml_chaos_lorenz(
+    const ok = lib.symbols.ermc_chaos_lorenz(
       x0,
       y0,
       z0,

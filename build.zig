@@ -15,11 +15,6 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    _ = b.addModule("math-ml", .{
-        .root_source_file = b.path("src/root.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
 
     // Biblioteca compartida (.dll en Windows, .so en Linux, .dylib en macOS)
     // Para consumo FFI desde Bun / Node.js / TypeScript / Python
@@ -32,7 +27,6 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
             .imports = &.{
                 .{ .name = "ermc", .module = mod },
-                .{ .name = "math-ml", .module = mod },
             },
         }),
     });
@@ -47,7 +41,6 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
             .imports = &.{
                 .{ .name = "ermc", .module = mod },
-                .{ .name = "math-ml", .module = mod },
             },
         }),
     });
@@ -72,7 +65,6 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
             .imports = &.{
                 .{ .name = "ermc", .module = mod },
-                .{ .name = "math-ml", .module = mod },
             },
         }),
     });

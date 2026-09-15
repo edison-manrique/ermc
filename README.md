@@ -126,7 +126,7 @@ ermc/
 │   └── bun/                      <-- BINDINGS MODULARES PARA TYPESCRIPT & BUN
 │       ├── package.json          <-- Paquete Bun "ermc-bun"
 │       ├── demo.ts               <-- Demo integral de los 8 dominios en TS
-│       ├── math_ml.ts            <-- Re-exportador de retrocompatibilidad
+│       ├── ermc.ts            <-- Re-exportador de retrocompatibilidad
 │       └── src/                  <-- Módulos TypeScript desacoplados
 │           ├── index.ts          <-- Re-exportador principal
 │           ├── types.ts          <-- Enums, Interfaces y Tipos
@@ -213,7 +213,7 @@ bun run demo.ts
 Salida esperada:
 ```text
 =========================================================================
-  MATH-ML EN BUN + TYPESCRIPT VIA FFI (.DLL)
+  ERMC EN BUN + TYPESCRIPT VIA FFI (.DLL)
   Versión de DLL Nativa (Zig 0.16): 0.3.0
 =========================================================================
 
@@ -260,7 +260,7 @@ Ley Teórica: f(theta, omega) = -9.81 * sin(theta) - 0.5 * omega^2
   Diagnóstico: SISTEMA CAÓTICO CONFIRMADO (Efecto Mariposa)
 
 =========================================================================
- >> Bun + TypeScript FFI sobre math_ml.dll FUNCIONANDO AL 100%!
+ >> Bun + TypeScript FFI sobre ermc.dll FUNCIONANDO AL 100%!
 =========================================================================
 ```
 
@@ -325,8 +325,8 @@ const angleRad  = HilbertSpace.angle(u, v);        // 0.841069 rad
 
 #### En Zig:
 ```zig
-const math_ml = @import("math_ml");
-const hilbert = math_ml.linalg.hilbert;
+const ermc = @import("ermc");
+const hilbert = ermc.linalg.hilbert;
 
 const u = [_]f64{ 1.0, 2.0, 3.0, 4.0 };
 const v = [_]f64{ 4.0, 3.0, 2.0, 1.0 };
@@ -453,16 +453,16 @@ console.log(`Próximo valor predicho: ${nextVal}`); // 144
 
 ### Módulos en Zig (`src/`)
 
-- [`src/root.zig`](file:///c:/EMC/GDRIVE/app-center/GITHUB/math-ml/src/root.zig): Exporta los submódulos públicos de la biblioteca.
-- [`src/engine.zig`](file:///c:/EMC/GDRIVE/app-center/GITHUB/math-ml/src/engine.zig): Fachada principal `OmniEngine` con flujo de regresión esparsa.
-- [`src/ffi.zig`](file:///c:/EMC/GDRIVE/app-center/GITHUB/math-ml/src/ffi.zig): Funciones con convención C (`callconv(.c)`) para interoperabilidad externa.
-- [`src/core/`](file:///c:/EMC/GDRIVE/app-center/GITHUB/math-ml/src/core/): Primitivas de punto flotante, sumas de Neumaier, RNG y utilidades SIMD.
-- [`src/linalg/`](file:///c:/EMC/GDRIVE/app-center/GITHUB/math-ml/src/linalg/): Álgebra lineal densa, factorización QR Householder, ortogonalización en espacios de Hilbert y SVD Jacobi.
-- [`src/stats/`](file:///c:/EMC/GDRIVE/app-center/GITHUB/math-ml/src/stats/): Filtro Hampel robusto a $10^{100}$, estimador de escala MAD y prueba ESD.
-- [`src/solver/`](file:///c:/EMC/GDRIVE/app-center/GITHUB/math-ml/src/solver/): STLSQ, solucionador SINDy para ecuaciones diferenciales, DMD, integradores RK4 y cálculo de exponentes de Lyapunov.
-- [`src/symbolic/`](file:///c:/EMC/GDRIVE/app-center/GITHUB/math-ml/src/symbolic/): Construcción y evaluación de diccionarios de funciones base y snapping de coeficientes a fracciones racionales exactas.
-- [`src/autodiff/`](file:///c:/EMC/GDRIVE/app-center/GITHUB/math-ml/src/autodiff/): Números duales y diferenciación automática forward-mode.
-- [`src/series/`](file:///c:/EMC/GDRIVE/app-center/GITHUB/math-ml/src/series/): Tablas de diferencias finitas para inferencia de secuencias.
+- [`src/root.zig`](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/root.zig): Exporta los submódulos públicos de la biblioteca.
+- [`src/engine.zig`](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/engine.zig): Fachada principal `OmniEngine` con flujo de regresión esparsa.
+- [`src/ffi.zig`](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/ffi.zig): Funciones con convención C (`callconv(.c)`) para interoperabilidad externa.
+- [`src/core/`](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/core/): Primitivas de punto flotante, sumas de Neumaier, RNG y utilidades SIMD.
+- [`src/linalg/`](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/linalg/): Álgebra lineal densa, factorización QR Householder, ortogonalización en espacios de Hilbert y SVD Jacobi.
+- [`src/stats/`](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/stats/): Filtro Hampel robusto a $10^{100}$, estimador de escala MAD y prueba ESD.
+- [`src/solver/`](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/solver/): STLSQ, solucionador SINDy para ecuaciones diferenciales, DMD, integradores RK4 y cálculo de exponentes de Lyapunov.
+- [`src/symbolic/`](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/symbolic/): Construcción y evaluación de diccionarios de funciones base y snapping de coeficientes a fracciones racionales exactas.
+- [`src/autodiff/`](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/autodiff/): Números duales y diferenciación automática forward-mode.
+- [`src/series/`](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/series/): Tablas de diferencias finitas para inferencia de secuencias.
 
 ---
 
@@ -470,10 +470,10 @@ console.log(`Próximo valor predicho: ${nextVal}`); // 144
 
 Para profundizar en el diseño, la teoría matemática o la referencia detallada de la API, consulta los documentos complementarios:
 
-- **[Guía de Uso Completa (`GUIA_DE_USO.md`)](file:///c:/EMC/GDRIVE/app-center/GITHUB/math-ml/GUIA_DE_USO.md)**: Manual exhaustivo con explicaciones detalladas paso a paso, tablas de la API de TypeScript y ejemplos en Zig.
-- **[Arquitectura y Comparativa (`ARQUITECTURA_V6_Y_COMPARATIVA.md`)](file:///c:/EMC/GDRIVE/app-center/GITHUB/math-ml/ARQUITECTURA_V6_Y_COMPARATIVA.md)**: Comparación entre la versión C original (`omni_core_v6_ultra.c`) y la arquitectura idiomática en Zig 0.16.0.
-- **[Espacios de Hilbert y Capacidades Avanzadas (`ESPACIOS_HILBERT_OUTLIERS_Y_CAPACIDADES.md`)](file:///c:/EMC/GDRIVE/app-center/GITHUB/math-ml/ESPACIOS_HILBERT_OUTLIERS_Y_CAPACIDADES.md)**: Demostraciones matemáticas sobre MGS-DGKS, el filtro Hampel inmune a desbordamientos y el algoritmo SVD Jacobi.
-- **[Registro de Mejoras (`MEJORAS_V2.md`)](file:///c:/EMC/GDRIVE/app-center/GITHUB/math-ml/MEJORAS_V2.md)**: Bitácora de optimizaciones SIMD, correcciones numéricas y nuevas funcionalidades.
+- **[Guía de Uso Completa (`GUIA_DE_USO.md`)](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/GUIA_DE_USO.md)**: Manual exhaustivo con explicaciones detalladas paso a paso, tablas de la API de TypeScript y ejemplos en Zig.
+- **[Arquitectura y Comparativa (`ARQUITECTURA_V6_Y_COMPARATIVA.md`)](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/ARQUITECTURA_V6_Y_COMPARATIVA.md)**: Comparación entre la versión C original (`omni_core_v6_ultra.c`) y la arquitectura idiomática en Zig 0.16.0.
+- **[Espacios de Hilbert y Capacidades Avanzadas (`ESPACIOS_HILBERT_OUTLIERS_Y_CAPACIDADES.md`)](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/ESPACIOS_HILBERT_OUTLIERS_Y_CAPACIDADES.md)**: Demostraciones matemáticas sobre MGS-DGKS, el filtro Hampel inmune a desbordamientos y el algoritmo SVD Jacobi.
+- **[Registro de Mejoras (`MEJORAS_V2.md`)](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/MEJORAS_V2.md)**: Bitácora de optimizaciones SIMD, correcciones numéricas y nuevas funcionalidades.
 
 ---
 

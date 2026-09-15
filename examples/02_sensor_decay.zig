@@ -4,12 +4,12 @@
 // Ver archivo LICENSE en la raíz del proyecto para términos completos.
 
 const std = @import("std");
-const math_ml = @import("math-ml");
+const ermc = @import("ermc");
 
-const OmniEngine = math_ml.OmniEngine;
-const OmniRng = math_ml.OmniRng;
-const Activation = math_ml.Activation;
-const Sample = math_ml.Sample;
+const OmniEngine = ermc.OmniEngine;
+const OmniRng = ermc.OmniRng;
+const Activation = ermc.Activation;
+const Sample = ermc.Sample;
 
 /// [EJEMPLO 2] SENSOR CON DECAIMIENTO EXPONENCIAL Y RUIDO GAUSSIANO
 /// Ley Física: f(T) = 15.0000 - 0.8000*x0 + 2.4000*exp(-x0)

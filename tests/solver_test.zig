@@ -5,15 +5,15 @@
 
 const std = @import("std");
 const testing = std.testing;
-const math_ml = @import("math-ml");
+const ermc = @import("ermc");
 
-const OmniEngine = math_ml.OmniEngine;
-const OmniRng = math_ml.core.rng.OmniRng;
-const metrics = math_ml.solver.metrics;
-const integrator = math_ml.solver.integrator;
-const dmd = math_ml.solver.dmd;
-const chaos = math_ml.solver.chaos;
-const DenseMatrix = math_ml.DenseMatrix;
+const OmniEngine = ermc.OmniEngine;
+const OmniRng = ermc.core.rng.OmniRng;
+const metrics = ermc.solver.metrics;
+const integrator = ermc.solver.integrator;
+const dmd = ermc.solver.dmd;
+const chaos = ermc.solver.chaos;
+const DenseMatrix = ermc.DenseMatrix;
 
 // ===========================================================================
 // SOLVER: ROBUST OUTLIER REJECTION
@@ -24,12 +24,12 @@ test "Solver: Robust MAD outlier rejection" {
     var engine = try OmniEngine.init(allocator, 1);
     defer engine.deinit();
 
-    const acts = [_]math_ml.Activation{.Identity};
+    const acts = [_]ermc.Activation{.Identity};
     try engine.buildExpansionDictionary(&acts);
 
     var rng = OmniRng.init(555);
     var samples_data: [50][1]f64 = undefined;
-    var dataset: [50]math_ml.Sample = undefined;
+    var dataset: [50]ermc.Sample = undefined;
 
     for (0..48) |i| {
         const x = rng.genRange(1.0, 10.0);
@@ -59,12 +59,12 @@ test "Solver: Automatic Model Selection via AIC (Zero user threshold)" {
     var engine = try OmniEngine.init(allocator, 1);
     defer engine.deinit();
 
-    const acts = [_]math_ml.Activation{ .Identity, .Sine, .Cosine, .Square, .Cube };
+    const acts = [_]ermc.Activation{ .Identity, .Sine, .Cosine, .Square, .Cube };
     try engine.buildExpansionDictionary(&acts);
 
     var rng = OmniRng.init(888);
     var samples_data: [150][1]f64 = undefined;
-    var dataset: [150]math_ml.Sample = undefined;
+    var dataset: [150]ermc.Sample = undefined;
 
     for (0..150) |i| {
         const x = rng.genRange(-2.0, 2.0);
@@ -188,11 +188,11 @@ test "Engine: computeR2 on perfect linear fit" {
     var engine = try OmniEngine.init(allocator, 1);
     defer engine.deinit();
 
-    const acts = [_]math_ml.Activation{.Identity};
+    const acts = [_]ermc.Activation{.Identity};
     try engine.buildExpansionDictionary(&acts);
 
     var samples_data: [20][1]f64 = undefined;
-    var dataset: [20]math_ml.Sample = undefined;
+    var dataset: [20]ermc.Sample = undefined;
     for (0..20) |i| {
         const x: f64 = @as(f64, @floatFromInt(i)) * 0.5;
         samples_data[i] = [1]f64{x};

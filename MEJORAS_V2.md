@@ -1,8 +1,8 @@
-# math-ml v2: Análisis Experto, Optimizaciones y Mejoras
+# ermc v2: Análisis Experto, Optimizaciones y Mejoras
 
 ## Resumen Ejecutivo
 
-Análisis completo de la librería **math-ml** (Motor de IA Matemática y Descubrimiento Simbólico en Zig 0.16.0) con aplicación de **12 mejoras** en las categorías de rendimiento, arquitectura, robustez y testing. El resultado es una librería más completa, robusta y expresiva sin sacrificar la corrección existente.
+Análisis completo de la librería **ermc** (Motor de IA Matemática y Descubrimiento Simbólico en Zig 0.16.0) con aplicación de **12 mejoras** en las categorías de rendimiento, arquitectura, robustez y testing. El resultado es una librería más completa, robusta y expresiva sin sacrificar la corrección existente.
 
 **Antes**: 11 tests, ~2,600 LOC, 15 archivos fuente
 **Después**: 30 tests, ~3,800 LOC, 17 archivos fuente
@@ -219,7 +219,7 @@ zig build run    → todos los ejemplos descubren leyes correctas
 ## Arquitectura Final
 
 ```
-math-ml/
+ermc/
 ├── build.zig
 ├── src/
 │   ├── root.zig                  # Exportaciones públicas de la librería

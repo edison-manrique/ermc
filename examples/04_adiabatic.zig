@@ -4,12 +4,12 @@
 // Ver archivo LICENSE en la raíz del proyecto para términos completos.
 
 const std = @import("std");
-const math_ml = @import("math-ml");
+const ermc = @import("ermc");
 
-const OmniEngine = math_ml.OmniEngine;
-const OmniRng = math_ml.OmniRng;
-const Activation = math_ml.Activation;
-const Sample = math_ml.Sample;
+const OmniEngine = ermc.OmniEngine;
+const OmniRng = ermc.OmniRng;
+const Activation = ermc.Activation;
+const Sample = ermc.Sample;
 
 /// [EJEMPLO 4] TERMODINÁMICA: ADIABÁTICA DE GAS MONOATÓMICO
 /// Ley Física: P(T, invV) = 1.6667*x0*x1  (Gamma: 5/3)

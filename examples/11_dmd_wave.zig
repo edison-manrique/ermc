@@ -4,10 +4,10 @@
 // Ver archivo LICENSE en la raíz del proyecto para términos completos.
 
 const std = @import("std");
-const math_ml = @import("math-ml");
+const ermc = @import("ermc");
 
-const DenseMatrix = math_ml.DenseMatrix;
-const dmd = math_ml.solver.dmd;
+const DenseMatrix = ermc.DenseMatrix;
+const dmd = ermc.solver.dmd;
 
 /// [EJEMPLO 11] DYNAMIC MODE DECOMPOSITION (DMD): MODOS COHERENTES
 pub fn run(allocator: std.mem.Allocator, io: anytype) !void {

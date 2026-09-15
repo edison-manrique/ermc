@@ -19,7 +19,7 @@ import {
 } from "./src/index";
 
 console.log("=========================================================================");
-console.log("  MATH-ML EN BUN + TYPESCRIPT VIA FFI (.DLL)");
+console.log("  ERMC EN BUN + TYPESCRIPT VIA FFI (.DLL)");
 console.log(`  Versión de DLL Nativa (Zig 0.16): ${getVersion()}`);
 console.log("=========================================================================\n");
 
@@ -131,5 +131,5 @@ console.log(`  Horizonte de Predictibilidad T_L: ${chaos.predictabilityHorizon.t
 console.log(`  Diagnóstico: ${chaos.lyapunovExponent > 0 ? "SISTEMA CAÓTICO CONFIRMADO (Efecto Mariposa)" : "SISTEMA ESTABLE"}\n`);
 
 console.log("=========================================================================");
-console.log(" >> Bun + TypeScript FFI sobre math_ml.dll FUNCIONANDO AL 100%!");
+console.log(" >> Bun + TypeScript FFI sobre ermc.dll FUNCIONANDO AL 100%!");
 console.log("=========================================================================");

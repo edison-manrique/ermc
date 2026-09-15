@@ -3,9 +3,9 @@
 // Licencia Dual: AGPL-3.0 para uso académico/personal | Licencia Comercial requerida para uso propietario.
 // Ver archivo LICENSE en la raíz del proyecto para términos completos.
 
-//! math-ml FFI (Foreign Function Interface) C-ABI Wrapper
+//! ERMC FFI (Foreign Function Interface) C-ABI Wrapper
 //!
-//! Permite que math-ml sea compilado como una biblioteca compartida (.dll en Windows,
+//! Permite que ERMC sea compilado como una biblioteca compartida (.dll en Windows,
 //! .so en Linux, .dylib en macOS) para ser invocada directamente mediante FFI
 //! desde Bun / Node.js / Deno / TypeScript o Python con cero sobrecosto.
 
@@ -18,7 +18,7 @@ const allocator = std.heap.page_allocator;
 // INFORMACIÓN Y VERSIÓN
 // ===========================================================================
 
-export fn math_ml_version() callconv(.c) [*:0]const u8 {
+export fn ermc_version() callconv(.c) [*:0]const u8 {
     return "0.3.0";
 }
 
@@ -26,7 +26,7 @@ export fn math_ml_version() callconv(.c) [*:0]const u8 {
 // OMNI-ENGINE: REGRESIÓN SIMBÓLICA Y DESCUBRIMIENTO DE LEYES
 // ===========================================================================
 
-export fn math_ml_engine_create(n_inputs: usize) callconv(.c) ?*anyopaque {
+export fn ermc_engine_create(n_inputs: usize) callconv(.c) ?*anyopaque {
     const engine = allocator.create(root.OmniEngine) catch return null;
     engine.* = root.OmniEngine.init(allocator, n_inputs) catch {
         allocator.destroy(engine);
@@ -42,7 +42,7 @@ export fn math_ml_engine_create(n_inputs: usize) callconv(.c) ?*anyopaque {
     return @ptrCast(engine);
 }
 
-export fn math_ml_engine_destroy(handle: ?*anyopaque) callconv(.c) void {
+export fn ermc_engine_destroy(handle: ?*anyopaque) callconv(.c) void {
     if (handle) |h| {
         const engine: *root.OmniEngine = @ptrCast(@alignCast(h));
         engine.deinit();
@@ -50,13 +50,13 @@ export fn math_ml_engine_destroy(handle: ?*anyopaque) callconv(.c) void {
     }
 }
 
-export fn math_ml_engine_term_count(handle: ?*anyopaque) callconv(.c) usize {
+export fn ermc_engine_term_count(handle: ?*anyopaque) callconv(.c) usize {
     if (handle == null) return 0;
     const engine: *root.OmniEngine = @ptrCast(@alignCast(handle.?));
     return engine.termCount();
 }
 
-export fn math_ml_engine_build_dictionary(
+export fn ermc_engine_build_dictionary(
     handle: ?*anyopaque,
     act_codes: [*]const u32,
     n_acts: usize,
@@ -78,7 +78,7 @@ export fn math_ml_engine_build_dictionary(
     return true;
 }
 
-export fn math_ml_engine_fit(
+export fn ermc_engine_fit(
     handle: ?*anyopaque,
     flat_inputs: [*]const f64,
     targets: [*]const f64,
@@ -108,7 +108,7 @@ export fn math_ml_engine_fit(
     return n_terms;
 }
 
-export fn math_ml_engine_predict(
+export fn ermc_engine_predict(
     handle: ?*anyopaque,
     input: [*]const f64,
     weights: [*]const f64,
@@ -120,7 +120,7 @@ export fn math_ml_engine_predict(
     return engine.predict(input[0..n_dim], weights[0..n_terms]);
 }
 
-export fn math_ml_engine_get_formula(
+export fn ermc_engine_get_formula(
     handle: ?*anyopaque,
     weights: [*]const f64,
     out_buf: [*]u8,
@@ -143,19 +143,19 @@ export fn math_ml_engine_get_formula(
 // ESPACIOS DE HILBERT
 // ===========================================================================
 
-export fn math_ml_hilbert_inner(u: [*]const f64, v: [*]const f64, n: usize) callconv(.c) f64 {
+export fn ermc_hilbert_inner(u: [*]const f64, v: [*]const f64, n: usize) callconv(.c) f64 {
     return root.linalg.inner(u[0..n], v[0..n]);
 }
 
-export fn math_ml_hilbert_norm(v: [*]const f64, n: usize) callconv(.c) f64 {
+export fn ermc_hilbert_norm(v: [*]const f64, n: usize) callconv(.c) f64 {
     return root.linalg.norm(v[0..n]);
 }
 
-export fn math_ml_hilbert_distance(u: [*]const f64, v: [*]const f64, n: usize) callconv(.c) f64 {
+export fn ermc_hilbert_distance(u: [*]const f64, v: [*]const f64, n: usize) callconv(.c) f64 {
     return root.linalg.distance(u[0..n], v[0..n]);
 }
 
-export fn math_ml_hilbert_angle(u: [*]const f64, v: [*]const f64, n: usize) callconv(.c) f64 {
+export fn ermc_hilbert_angle(u: [*]const f64, v: [*]const f64, n: usize) callconv(.c) f64 {
     return root.linalg.angle(u[0..n], v[0..n]);
 }
 
@@ -163,11 +163,11 @@ export fn math_ml_hilbert_angle(u: [*]const f64, v: [*]const f64, n: usize) call
 // ARITMÉTICA COMPENSADA Y OUTLIERS
 // ===========================================================================
 
-export fn math_ml_precision_sum(data: [*]const f64, n: usize) callconv(.c) f64 {
+export fn ermc_precision_sum(data: [*]const f64, n: usize) callconv(.c) f64 {
     return root.core.neumaierSum(data[0..n]);
 }
 
-export fn math_ml_precision_mean_var(
+export fn ermc_precision_mean_var(
     data: [*]const f64,
     n: usize,
     out_mean: *f64,
@@ -178,7 +178,7 @@ export fn math_ml_precision_mean_var(
     out_var.* = stats.variance;
 }
 
-export fn math_ml_outliers_hampel(
+export fn ermc_outliers_hampel(
     data: [*]const f64,
     n: usize,
     k_threshold: f64,
@@ -200,7 +200,7 @@ export fn math_ml_outliers_hampel(
 // SVD: DESCOMPOSICIÓN EN VALORES SINGULARES
 // ===========================================================================
 
-export fn math_ml_svd(
+export fn ermc_svd(
     matrix: [*]const f64,
     m: usize,
     n: usize,
@@ -244,7 +244,7 @@ export fn math_ml_svd(
 // IA DE SUCESIONES MATEMÁTICAS
 // ===========================================================================
 
-export fn math_ml_sequence_predict_next(seq: [*]const f64, n: usize) callconv(.c) f64 {
+export fn ermc_sequence_predict_next(seq: [*]const f64, n: usize) callconv(.c) f64 {
     if (n < 3) return 0.0;
     const seq_ai = root.SequenceAi.initExtended();
     const coefs = seq_ai.fitGaps(allocator, seq[0..n]) catch return 0.0;
@@ -256,7 +256,7 @@ export fn math_ml_sequence_predict_next(seq: [*]const f64, n: usize) callconv(.c
 // DYNAMIC MODE DECOMPOSITION (DMD)
 // ===========================================================================
 
-export fn math_ml_dmd_dominant_frequency(
+export fn ermc_dmd_dominant_frequency(
     snapshots: [*]const f64,
     n_sensors: usize,
     n_snaps: usize,
@@ -302,7 +302,7 @@ fn lorenzOdeFfi(t: f64, state: []const f64, dstate: []f64, ctx: ?*const anyopaqu
     dstate[2] = x * y - beta * z;
 }
 
-export fn math_ml_chaos_lorenz(
+export fn ermc_chaos_lorenz(
     x0: f64,
     y0: f64,
     z0: f64,

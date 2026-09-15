@@ -4,9 +4,9 @@
 // Ver archivo LICENSE en la raíz del proyecto para términos completos.
 
 const std = @import("std");
-const math_ml = @import("math-ml");
+const ermc = @import("ermc");
 
-const hilbert = math_ml.linalg.hilbert;
+const hilbert = ermc.linalg.hilbert;
 
 /// [EJEMPLO 8] ESPACIOS DE HILBERT Y DESCOMPOSICIÓN ORTOGONAL EN L^2
 pub fn run(allocator: std.mem.Allocator, io: anytype) !void {

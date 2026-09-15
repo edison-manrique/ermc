@@ -25,7 +25,7 @@ export class SequenceAI {
   ): number {
     const arr = sequence instanceof Float64Array ? sequence : new Float64Array(sequence);
     const lib = getNativeLib(customPath);
-    const rawVal = lib.symbols.math_ml_sequence_predict_next(ptr(arr), BigInt(arr.length));
+    const rawVal = lib.symbols.ermc_sequence_predict_next(ptr(arr), BigInt(arr.length));
 
     if (snapInteger) {
       const nearestInt = Math.round(rawVal);

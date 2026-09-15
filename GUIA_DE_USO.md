@@ -71,7 +71,7 @@ ermc/
 │   └── 12_chaos_lyapunov.zig     <-- Exponente de Lyapunov y horizonte de tiempo
 ├── bindings/
 │   └── bun/                      <-- LIBRERÍA MODULAR DE TYPESCRIPT PARA BUN
-│       ├── math_ml.ts            <-- Re-exportador para compatibilidad directa
+│       ├── ermc.ts            <-- Re-exportador para compatibilidad directa
 │       ├── demo.ts               <-- Demo interactivo en Bun
 │       ├── package.json          <-- Configuración de paquete Bun
 │       └── src/                  <-- MÓDULOS INDEPENDIENTES TS
@@ -94,7 +94,7 @@ ermc/
 
 ## 2. Compilación de la Biblioteca y de la DLL
 
-El archivo [build.zig](file:///c:/EMC/GDRIVE/app-center/GITHUB/math-ml/build.zig) compila simultáneamente tanto el ejecutable de ejemplos como la biblioteca compartida dinámica:
+El archivo [build.zig](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/build.zig) compila simultáneamente tanto el ejecutable de ejemplos como la biblioteca compartida dinámica:
 
 ### Comando de Compilación:
 ```bash
@@ -114,7 +114,7 @@ zig build -Doptimize=ReleaseFast
 
 ## 3. Ejecución de Tests Unitarios Modulares
 
-Todos los tests unitarios están segregados por dominio y agregados en [tests/root.zig](file:///c:/EMC/GDRIVE/app-center/GITHUB/math-ml/tests/root.zig).
+Todos los tests unitarios están segregados por dominio y agregados en [tests/root.zig](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/tests/root.zig).
 
 ### Ejecutar la suite completa:
 ```bash
@@ -137,7 +137,7 @@ zig test tests/solver_test.zig
 
 ## 4. Ejecución de los Ejemplos Modulares
 
-Los 12 ejemplos científicos se ejecutan mediante el runner modular [examples/root.zig](file:///c:/EMC/GDRIVE/app-center/GITHUB/math-ml/examples/root.zig):
+Los 12 ejemplos científicos se ejecutan mediante el runner modular [examples/root.zig](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/examples/root.zig):
 
 ```bash
 zig build run
@@ -156,11 +156,11 @@ Cada ejemplo es un archivo independiente que puede ser invocado o estudiado por 
 
 ## 5. Uso Nativo en Proyectos Zig
 
-En tu propio archivo `main.zig` o módulo Zig, simplemente importa el módulo `math-ml`:
+En tu propio archivo `main.zig` o módulo Zig, simplemente importa el módulo `ermc`:
 
 ```zig
 const std = @import("std");
-const math_ml = @import("math-ml");
+const ermc = @import("ermc");
 
 pub fn main() !void {
     const allocator = std.heap.page_allocator;
@@ -168,20 +168,20 @@ pub fn main() !void {
     // 1. Espacios de Hilbert
     const u = [_]f64{ 1.0, 2.0, 3.0 };
     const v = [_]f64{ 4.0, 5.0, 6.0 };
-    const inner_prod = math_ml.linalg.inner(&u, &v);
-    const norm_u = math_ml.linalg.norm(&u);
+    const inner_prod = ermc.linalg.inner(&u, &v);
+    const norm_u = ermc.linalg.norm(&u);
     std.debug.print("Producto interno: {d}, Norma: {d}\n", .{ inner_prod, norm_u });
 
     // 2. Detección de Outliers Extremos
     const signal = [_]f64{ 1.0, 1.05, 0.98, 1e100, 1.02 };
-    var detector = try math_ml.stats.detectOutliersHampel(allocator, &signal, 3.0);
+    var detector = try ermc.stats.detectOutliersHampel(allocator, &signal, 3.0);
     defer detector.deinit();
     std.debug.print("Outliers detectados: {d}\n", .{ detector.n_outliers });
 
     // 3. OmniEngine: Descubrimiento Simbólico
-    var engine = try math_ml.OmniEngine.init(allocator, 2);
+    var engine = try ermc.OmniEngine.init(allocator, 2);
     defer engine.deinit();
-    const acts = [_]math_ml.Activation{ .Identity, .Sine, .Square };
+    const acts = [_]ermc.Activation{ .Identity, .Sine, .Square };
     try engine.buildExpansionDictionary(&acts);
 }
 ```
@@ -190,7 +190,7 @@ pub fn main() !void {
 
 ## 6. Librería TypeScript en Bun (FFI Nativo)
 
-La librería incluye bindings completos para TypeScript en [bindings/bun/math_ml.ts](file:///c:/EMC/GDRIVE/app-center/GITHUB/math-ml/bindings/bun/math_ml.ts). Carga directamente `math_ml.dll` usando `bun:ffi` con **cero costo de serialización**.
+La librería incluye bindings completos para TypeScript en [bindings/bun/ermc.ts](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/bindings/bun/ermc.ts). Carga directamente `ermc.dll` usando `bun:ffi` con **cero costo de serialización**.
 
 ### Requisitos:
 1. Tener [Bun](https://bun.sh/) instalado (`bun --version`).
@@ -204,7 +204,7 @@ bun run bindings/bun/demo.ts
 Salida esperada:
 ```
 =========================================================================
-  MATH-ML EN BUN + TYPESCRIPT VIA FFI (.DLL)
+  ERMC EN BUN + TYPESCRIPT VIA FFI (.DLL)
   Versión de DLL Nativa (Zig 0.16): 0.3.0
 =========================================================================
 
@@ -411,20 +411,20 @@ console.log("Horizonte de Predictibilidad (s):", predictabilityHorizon);
 Para exponer una nueva función matemática de Zig hacia Bun TypeScript:
 
 1. **Implementa la lógica en su submódulo correspondiente** dentro de `src/` (ej. `src/linalg/`, `src/stats/`, etc.).
-2. **Re-exporta la función con `export fn ... callconv(.c)` en [src/ffi.zig](file:///c:/EMC/GDRIVE/app-center/GITHUB/math-ml/src/ffi.zig)** usando punteros C estándar (`[*]const f64`, `[*]f64`, `usize`, etc.).
+2. **Re-exporta la función con `export fn ... callconv(.c)` en [src/ffi.zig](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/src/ffi.zig)** usando punteros C estándar (`[*]const f64`, `[*]f64`, `usize`, etc.).
 3. **Recompila la DLL** ejecutando:
    ```bash
    zig build
    ```
-4. **Registra el símbolo FFI en [bindings/bun/src/ffi.ts](file:///c:/EMC/GDRIVE/app-center/GITHUB/math-ml/bindings/bun/src/ffi.ts)** dentro de `loadNativeSymbols`, indicando `args` y `returns` con `FFIType`.
+4. **Registra el símbolo FFI en [bindings/bun/src/ffi.ts](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/bindings/bun/src/ffi.ts)** dentro de `loadNativeSymbols`, indicando `args` y `returns` con `FFIType`.
 5. **Crea un módulo TypeScript nuevo** en `bindings/bun/src/` (ej. `mi_modulo.ts`) con la clase wrapper que use `Float64Array`, `ptr()` y `getNativeLib()`.
-6. **Re-exporta desde [bindings/bun/src/index.ts](file:///c:/EMC/GDRIVE/app-center/GITHUB/math-ml/bindings/bun/src/index.ts)** añadiendo `export * from "./mi_modulo";`.
+6. **Re-exporta desde [bindings/bun/src/index.ts](file:///c:/EMC/GDRIVE/app-center/GITHUB/ermc/bindings/bun/src/index.ts)** añadiendo `export * from "./mi_modulo";`.
 
 ### Estructura modular de los bindings TypeScript:
 
 ```
 bindings/bun/
-├── math_ml.ts              ← Re-exportación retrocompatible
+├── ermc.ts              ← Re-exportación retrocompatible
 ├── demo.ts                 ← Demo interactivo
 ├── package.json
 └── src/                    ← Módulos individuales

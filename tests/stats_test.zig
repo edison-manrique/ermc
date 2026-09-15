@@ -5,9 +5,9 @@
 
 const std = @import("std");
 const testing = std.testing;
-const math_ml = @import("math-ml");
+const ermc = @import("ermc");
 
-const outliers = math_ml.stats.outliers;
+const outliers = ermc.stats.outliers;
 
 // ===========================================================================
 // STATS: DETECCIÓN DE OUTLIERS EXTREMOS SIN PÉRDIDA DE PRECISIÓN

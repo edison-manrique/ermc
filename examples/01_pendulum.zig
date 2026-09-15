@@ -4,12 +4,12 @@
 // Ver archivo LICENSE en la raíz del proyecto para términos completos.
 
 const std = @import("std");
-const math_ml = @import("math-ml");
+const ermc = @import("ermc");
 
-const OmniEngine = math_ml.OmniEngine;
-const OmniRng = math_ml.OmniRng;
-const Activation = math_ml.Activation;
-const Sample = math_ml.Sample;
+const OmniEngine = ermc.OmniEngine;
+const OmniRng = ermc.OmniRng;
+const Activation = ermc.Activation;
+const Sample = ermc.Sample;
 
 /// [EJEMPLO 1] PÉNDULO CON ARRASTRE DE AIRE CUADRÁTICO
 /// Ley Física: f(theta, omega) = -9.8100*sin(x0) - 0.5000*x1^2

@@ -4,10 +4,10 @@
 // Ver archivo LICENSE en la raíz del proyecto para términos completos.
 
 const std = @import("std");
-const math_ml = @import("math-ml");
+const ermc = @import("ermc");
 
-const precision = math_ml.core.precision;
-const outliers = math_ml.stats.outliers;
+const precision = ermc.core.precision;
+const outliers = ermc.stats.outliers;
 
 /// [EJEMPLO 9] DETECCIÓN DE OUTLIERS EXTREMOS DE ESCALA CÓSMICA (10^100)
 pub fn run(allocator: std.mem.Allocator, io: anytype) !void {

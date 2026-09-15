@@ -36,7 +36,7 @@ export class DMD {
     }
 
     const lib = getNativeLib(customPath);
-    return lib.symbols.math_ml_dmd_dominant_frequency(
+    return lib.symbols.ermc_dmd_dominant_frequency(
       ptr(flat),
       BigInt(nSensors),
       BigInt(nSnaps),

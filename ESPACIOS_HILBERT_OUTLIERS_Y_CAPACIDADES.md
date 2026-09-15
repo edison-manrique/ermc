@@ -1,6 +1,6 @@
-# Espacios de Hilbert, Detección de Outliers de Ultra-Precisión y Capacidades SciML Avanzadas en `math-ml`
+# Espacios de Hilbert, Detección de Outliers de Ultra-Precisión y Capacidades SciML Avanzadas en `ermc`
 
-Este documento describe las nuevas capacidades matemáticas incorporadas en **`math-ml` (v0.3.0 / Zig 0.16.0)**:
+Este documento describe las nuevas capacidades matemáticas incorporadas en **`ermc` (v0.3.0 / Zig 0.16.0)**:
 1. **Espacios de Hilbert y Proyecciones Ortogonales** con ortogonalización MGS-DGKS y descomposición en $L^2$.
 2. **Cálculo de Outliers Extremos sin Pérdida de Precisión** mediante Aritmética Compensada de Kahan-Babuška-Neumaier y estimadores invariantes a la escala.
 3. **Descomposición en Valores Singulares (SVD)** mediante el algoritmo de Jacobi Unilateral de Hestenes.
@@ -16,7 +16,7 @@ Este documento describe las nuevas capacidades matemáticas incorporadas en **`m
 Un espacio de Hilbert $H$ es un espacio vectorial dotado de un producto interno $\langle \cdot, \cdot \rangle$ que induce una norma métrica completa:
 $$\|v\|_H = \sqrt{\langle v, v \rangle}, \quad d_H(u, v) = \|u - v\|_H$$
 
-En `math-ml`, soportamos tanto el producto euclidiano estándar como el producto ponderado en espacios funcionales $L^2$ discretos:
+En `ermc`, soportamos tanto el producto euclidiano estándar como el producto ponderado en espacios funcionales $L^2$ discretos:
 $$\langle u, v \rangle_w = \sum_{i=1}^m w_i u_i v_i$$
 
 ### 1.2. Ortogonalización MGS con Re-ortogonalización DGKS ("Twice is Enough")

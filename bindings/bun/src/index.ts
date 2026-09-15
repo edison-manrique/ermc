@@ -6,7 +6,7 @@
  */
 
 /**
- * MATH-ML: Biblioteca de Machine Learning Científico, Álgebra Numérica y Descubrimiento Simbólico
+ * ERMC: Biblioteca de Machine Learning Científico, Álgebra Numérica y Descubrimiento Simbólico
  * Powered by Zig 0.16.0 Native FFI DLL
  */
 
@@ -26,5 +26,5 @@ import { getNativeLib } from "./ffi";
 /** Obtiene la versión del motor nativo Zig compilado en la DLL */
 export function getVersion(customPath?: string): string {
   const lib = getNativeLib(customPath);
-  return lib.symbols.math_ml_version().toString();
+  return lib.symbols.ermc_version().toString();
 }

@@ -4,9 +4,9 @@
 // Ver archivo LICENSE en la raíz del proyecto para términos completos.
 
 const std = @import("std");
-const math_ml = @import("math-ml");
+const ermc = @import("ermc");
 
-const SequenceAi = math_ml.SequenceAi;
+const SequenceAi = ermc.SequenceAi;
 
 /// [EJEMPLO 7] IA DE SECUENCIAS MATEMÁTICAS (SERIES & GAPS)
 pub fn run(allocator: std.mem.Allocator, io: anytype) !void {

@@ -5,9 +5,9 @@
 
 const std = @import("std");
 const testing = std.testing;
-const math_ml = @import("math-ml");
+const ermc = @import("ermc");
 
-const dual = math_ml.autodiff.dual;
+const dual = ermc.autodiff.dual;
 const Dual = dual.Dual;
 
 // ===========================================================================

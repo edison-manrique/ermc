@@ -32,7 +32,7 @@ export class SVD {
     const outV = new Float64Array(cols * cols);
 
     const lib = getNativeLib(customPath);
-    const ok = lib.symbols.math_ml_svd(
+    const ok = lib.symbols.ermc_svd(
       ptr(flat),
       BigInt(rows),
       BigInt(cols),

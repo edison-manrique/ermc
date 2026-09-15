@@ -22,7 +22,7 @@ export class HilbertSpace {
     const uArr = u instanceof Float64Array ? u : new Float64Array(u);
     const vArr = v instanceof Float64Array ? v : new Float64Array(v);
     const lib = getNativeLib(customPath);
-    return lib.symbols.math_ml_hilbert_inner(ptr(uArr), ptr(vArr), BigInt(n));
+    return lib.symbols.ermc_hilbert_inner(ptr(uArr), ptr(vArr), BigInt(n));
   }
 
   /** Norma inducida $\|v\|_H = \sqrt{\langle v, v \rangle}$ */
@@ -33,7 +33,7 @@ export class HilbertSpace {
     const n = v.length;
     const vArr = v instanceof Float64Array ? v : new Float64Array(v);
     const lib = getNativeLib(customPath);
-    return lib.symbols.math_ml_hilbert_norm(ptr(vArr), BigInt(n));
+    return lib.symbols.ermc_hilbert_norm(ptr(vArr), BigInt(n));
   }
 
   /** Distancia métrica $d(u, v) = \|u - v\|_H$ */
@@ -46,7 +46,7 @@ export class HilbertSpace {
     const uArr = u instanceof Float64Array ? u : new Float64Array(u);
     const vArr = v instanceof Float64Array ? v : new Float64Array(v);
     const lib = getNativeLib(customPath);
-    return lib.symbols.math_ml_hilbert_distance(ptr(uArr), ptr(vArr), BigInt(n));
+    return lib.symbols.ermc_hilbert_distance(ptr(uArr), ptr(vArr), BigInt(n));
   }
 
   /** Ángulo en radianes $\theta = \arccos\left(\frac{\langle u, v \rangle}{\|u\| \|v\|}\right)$ */
@@ -59,6 +59,6 @@ export class HilbertSpace {
     const uArr = u instanceof Float64Array ? u : new Float64Array(u);
     const vArr = v instanceof Float64Array ? v : new Float64Array(v);
     const lib = getNativeLib(customPath);
-    return lib.symbols.math_ml_hilbert_angle(ptr(uArr), ptr(vArr), BigInt(n));
+    return lib.symbols.ermc_hilbert_angle(ptr(uArr), ptr(vArr), BigInt(n));
   }
 }

@@ -21,7 +21,7 @@ export class Precision {
   public static sum(data: number[] | Float64Array, customPath?: string): number {
     const arr = data instanceof Float64Array ? data : new Float64Array(data);
     const lib = getNativeLib(customPath);
-    return lib.symbols.math_ml_precision_sum(ptr(arr), BigInt(arr.length));
+    return lib.symbols.ermc_precision_sum(ptr(arr), BigInt(arr.length));
   }
 
   /**
@@ -35,7 +35,7 @@ export class Precision {
     const meanBuf = new Float64Array(1);
     const varBuf = new Float64Array(1);
     const lib = getNativeLib(customPath);
-    lib.symbols.math_ml_precision_mean_var(
+    lib.symbols.ermc_precision_mean_var(
       ptr(arr),
       BigInt(arr.length),
       ptr(meanBuf),

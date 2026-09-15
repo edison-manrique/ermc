@@ -6,7 +6,7 @@
  */
 
 /**
- * Re-exportación para retrocompatibilidad
- * La biblioteca ahora es 100% modular bajo ./src/
+ * ERMC (Exact Regression Mathematical Core)
+ * Punto de entrada TypeScript para Bun
  */
 export * from "./src/index";

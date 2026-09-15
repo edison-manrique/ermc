@@ -5,14 +5,14 @@
 
 const std = @import("std");
 const testing = std.testing;
-const math_ml = @import("math-ml");
+const ermc = @import("ermc");
 
-const DenseMatrix = math_ml.linalg.DenseMatrix;
-const solve4x4 = math_ml.linalg.solve4x4;
-const solveDenseSystem = math_ml.linalg.matrix.solveDenseSystem;
-const solveWeightedQr = math_ml.linalg.solveWeightedQrPreconditioned;
-const hilbert = math_ml.linalg.hilbert;
-const svd = math_ml.linalg.svd;
+const DenseMatrix = ermc.linalg.DenseMatrix;
+const solve4x4 = ermc.linalg.solve4x4;
+const solveDenseSystem = ermc.linalg.matrix.solveDenseSystem;
+const solveWeightedQr = ermc.linalg.solveWeightedQrPreconditioned;
+const hilbert = ermc.linalg.hilbert;
+const svd = ermc.linalg.svd;
 
 // ===========================================================================
 // LINALG: SOLVER 4x4

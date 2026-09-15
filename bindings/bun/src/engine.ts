@@ -22,7 +22,7 @@ export class OmniEngine {
   constructor(numInputs: number, customPath?: string) {
     this.lib = getNativeLib(customPath);
     this.numInputs = numInputs;
-    this.handle = this.lib.symbols.math_ml_engine_create(BigInt(numInputs));
+    this.handle = this.lib.symbols.ermc_engine_create(BigInt(numInputs));
     if (!this.handle) {
       throw new Error("No se pudo inicializar OmniEngine en C/Zig");
     }
@@ -32,7 +32,7 @@ export class OmniEngine {
   private updateTermCount(): void {
     if (this.handle) {
       this.currentTermCount = Number(
-        this.lib.symbols.math_ml_engine_term_count(this.handle)
+        this.lib.symbols.ermc_engine_term_count(this.handle)
       );
     }
   }
@@ -54,7 +54,7 @@ export class OmniEngine {
     if (activations.length === 0) return;
 
     const actCodes = new Uint32Array(activations);
-    const ok = this.lib.symbols.math_ml_engine_build_dictionary(
+    const ok = this.lib.symbols.ermc_engine_build_dictionary(
       this.handle,
       ptr(actCodes),
       BigInt(actCodes.length)
@@ -68,7 +68,7 @@ export class OmniEngine {
   /** Libera los recursos nativos asignados en el motor Zig */
   public dispose(): void {
     if (this.handle) {
-      this.lib.symbols.math_ml_engine_destroy(this.handle);
+      this.lib.symbols.ermc_engine_destroy(this.handle);
       this.handle = null;
     }
   }
@@ -102,7 +102,7 @@ export class OmniEngine {
     const maxTerms = this.currentTermCount > 0 ? this.currentTermCount : 512;
     const outWeights = new Float64Array(maxTerms);
 
-    const activeTerms = this.lib.symbols.math_ml_engine_fit(
+    const activeTerms = this.lib.symbols.ermc_engine_fit(
       this.handle,
       ptr(flatInputs),
       ptr(targetArr),
@@ -122,7 +122,7 @@ export class OmniEngine {
   public predict(inputVector: number[], weights: Float64Array): number {
     if (!this.handle) throw new Error("OmniEngine ya ha sido liberado");
     const inArr = new Float64Array(inputVector);
-    return this.lib.symbols.math_ml_engine_predict(
+    return this.lib.symbols.ermc_engine_predict(
       this.handle,
       ptr(inArr),
       ptr(weights)
@@ -136,7 +136,7 @@ export class OmniEngine {
   public getFormula(weights: Float64Array): string {
     if (!this.handle) throw new Error("OmniEngine ya ha sido liberado");
     const buf = new Uint8Array(2048);
-    const len = this.lib.symbols.math_ml_engine_get_formula(
+    const len = this.lib.symbols.ermc_engine_get_formula(
       this.handle,
       ptr(weights),
       ptr(buf),

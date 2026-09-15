@@ -3,7 +3,7 @@
 // Licencia Dual: AGPL-3.0 para uso académico/personal | Licencia Comercial requerida para uso propietario.
 // Ver archivo LICENSE en la raíz del proyecto para términos completos.
 
-//! math-ml Test Suite Runner
+//! ERMC Test Suite Runner
 //!
 //! Agrupa y ejecuta de manera modular todos los tests organizados por subsistema:
 //! - core: RNG, SIMD, Precisión compensada Neumaier

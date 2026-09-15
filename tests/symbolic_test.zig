@@ -5,12 +5,12 @@
 
 const std = @import("std");
 const testing = std.testing;
-const math_ml = @import("math-ml");
+const ermc = @import("ermc");
 
-const snapping = math_ml.symbolic.snapping;
-const dictionary = math_ml.symbolic.dictionary;
-const activation = math_ml.symbolic.activation;
-const formatter = math_ml.symbolic.formatter;
+const snapping = ermc.symbolic.snapping;
+const dictionary = ermc.symbolic.dictionary;
+const activation = ermc.symbolic.activation;
+const formatter = ermc.symbolic.formatter;
 
 // ===========================================================================
 // SYMBOLIC: ACTIVATIONS
@@ -124,7 +124,7 @@ test "Symbolic: Bitmask Origin Tracking and Canonical Ordering" {
     var dict = try dictionary.ExpansionDictionary.init(allocator, 3);
     defer dict.deinit();
 
-    const acts = [_]math_ml.Activation{ .Sine, .Square };
+    const acts = [_]ermc.Activation{ .Sine, .Square };
     try dict.buildExpansion(&acts);
 
     for (dict.node_names.items, 0..) |name1, i| {

@@ -5,9 +5,9 @@
 
 const std = @import("std");
 const testing = std.testing;
-const math_ml = @import("math-ml");
+const ermc = @import("ermc");
 
-const filter = math_ml.filter.savitzky_golay;
+const filter = ermc.filter.savitzky_golay;
 
 // ===========================================================================
 // FILTER: SAVITZKY-GOLAY

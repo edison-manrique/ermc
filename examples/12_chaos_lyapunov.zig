@@ -4,9 +4,9 @@
 // Ver archivo LICENSE en la raíz del proyecto para términos completos.
 
 const std = @import("std");
-const math_ml = @import("math-ml");
+const ermc = @import("ermc");
 
-const chaos = math_ml.solver.chaos;
+const chaos = ermc.solver.chaos;
 
 fn lorenzOdeDemo(t: f64, state: []const f64, dstate: []f64, ctx: ?*const anyopaque) void {
     _ = t;

@@ -29,7 +29,7 @@ export class Outliers {
     const clean = new Float64Array(n);
 
     const lib = getNativeLib(customPath);
-    const count = lib.symbols.math_ml_outliers_hampel(
+    const count = lib.symbols.ermc_outliers_hampel(
       ptr(arr),
       BigInt(n),
       kThreshold,

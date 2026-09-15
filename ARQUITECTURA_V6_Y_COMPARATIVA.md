@@ -1,12 +1,12 @@
-# Arquitectura v6 Ultra y Guía Técnica: `math-ml`
+# Arquitectura v6 Ultra y Guía Técnica: `ermc`
 
-Este documento detalla las innovaciones matemáticas y de ingeniería extraídas de **`omni_core_v6_ultra.c`** e incorporadas en la biblioteca modular **`math-ml`** (Zig 0.16.0).
+Este documento detalla las innovaciones matemáticas y de ingeniería extraídas de **`omni_core_v6_ultra.c`** e incorporadas en la biblioteca modular **`ermc`** (Zig 0.16.0).
 
 ---
 
-## 1. Comparativa Conceptual: Rust v3.5 vs C v6 Ultra vs Zig `math-ml`
+## 1. Comparativa Conceptual: Rust v3.5 vs C v6 Ultra vs Zig `ermc`
 
-| Dimensión | Omni-Core Rust (v3.5) | Omni-Core C (v6 Ultra) | `math-ml` (Zig 0.16.0) |
+| Dimensión | Omni-Core Rust (v3.5) | Omni-Core C (v6 Ultra) | `ermc` (Zig 0.16.0) |
 | :--- | :--- | :--- | :--- |
 | **Rastreo de Origen de Nodos** | `Vec<Vec<usize>>` con clonación, ordenamiento y `contains()` | `unsigned long long` bitfield (`1ULL << i`) | Máscaras de bits `u64` nativas ($O(1)$ bitwise) |
 | **Filtrado de Outliers** | Desviación estándar y percentil $P_{90}$ | **MAD** (*Median Absolute Deviation*) con corte $4.5 \times \text{MAD}$ | **MAD** exacto ordenado in-place sin fugas |
@@ -77,7 +77,7 @@ Se incorporó detección de constantes universales exactas:
 
 ```zig
 const std = @import("std");
-const math_ml = @import("math-ml");
+const ermc = @import("ermc");
 
 pub fn main() !void {
     var gpa = std.heap.DebugAllocator(.{}){};
@@ -85,11 +85,11 @@ pub fn main() !void {
     const allocator = gpa.allocator();
 
     // 1. Inicializar motor para 2 variables de entrada
-    var engine = try math_ml.OmniEngine.init(allocator, 2);
+    var engine = try ermc.OmniEngine.init(allocator, 2);
     defer engine.deinit();
 
     // 2. Compilar diccionario de bases (univariadas e interacciones)
-    const bases = [_]math_ml.Activation{ .Identity, .Sine, .Square, .Cube, .ExpNeg };
+    const bases = [_]ermc.Activation{ .Identity, .Sine, .Square, .Cube, .ExpNeg };
     try engine.buildExpansionDictionary(&bases);
 
     // 3. Resolver regresión simbólica (0.0 activa selección automática AIC)

@@ -4,10 +4,10 @@
 // Ver archivo LICENSE en la raíz del proyecto para términos completos.
 
 const std = @import("std");
-const math_ml = @import("math-ml");
+const ermc = @import("ermc");
 
-const OmniEngine = math_ml.OmniEngine;
-const Activation = math_ml.Activation;
+const OmniEngine = ermc.OmniEngine;
+const Activation = ermc.Activation;
 
 /// [EJEMPLO 6] ATRACTOR CAÓTICO DE LORENZ: RECONSTRUCCIÓN ODE DINÁMICA (SINDy)
 /// dx/dt = 10*(y - x) | dy/dt = x*(28 - z) - y | dz/dt = x*y - (8/3)*z

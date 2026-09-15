@@ -10,9 +10,7 @@ import { resolve } from "path";
 import { existsSync } from "fs";
 
 // Ruta por defecto a la biblioteca DLL compartida generada por Zig
-const ermcPath = resolve(import.meta.dir, "../../../zig-out/bin/ermc.dll");
-const mathMlPath = resolve(import.meta.dir, "../../../zig-out/bin/math_ml.dll");
-export const defaultDllPath = existsSync(ermcPath) ? ermcPath : mathMlPath;
+export const defaultDllPath = resolve(import.meta.dir, "../../../zig-out/bin/ermc.dll");
 
 export type NativeSymbols = ReturnType<typeof loadNativeSymbols>;
 
@@ -28,23 +26,23 @@ export function getNativeLib(customPath?: string): NativeSymbols {
 
 function loadNativeSymbols(path: string) {
   return dlopen(path, {
-    math_ml_version: {
+    ermc_version: {
       args: [],
       returns: FFIType.cstring,
     },
-    math_ml_engine_create: {
+    ermc_engine_create: {
       args: [FFIType.u64],
       returns: FFIType.ptr,
     },
-    math_ml_engine_destroy: {
+    ermc_engine_destroy: {
       args: [FFIType.ptr],
       returns: FFIType.void,
     },
-    math_ml_engine_term_count: {
+    ermc_engine_term_count: {
       args: [FFIType.ptr],
       returns: FFIType.u64,
     },
-    math_ml_engine_build_dictionary: {
+    ermc_engine_build_dictionary: {
       args: [
         FFIType.ptr, // handle
         FFIType.ptr, // act_codes (u32*)
@@ -52,7 +50,7 @@ function loadNativeSymbols(path: string) {
       ],
       returns: FFIType.bool,
     },
-    math_ml_engine_fit: {
+    ermc_engine_fit: {
       args: [
         FFIType.ptr, // handle
         FFIType.ptr, // flat_inputs (f64*)
@@ -63,7 +61,7 @@ function loadNativeSymbols(path: string) {
       ],
       returns: FFIType.u64,
     },
-    math_ml_engine_predict: {
+    ermc_engine_predict: {
       args: [
         FFIType.ptr, // handle
         FFIType.ptr, // input (f64*)
@@ -71,7 +69,7 @@ function loadNativeSymbols(path: string) {
       ],
       returns: FFIType.f64,
     },
-    math_ml_engine_get_formula: {
+    ermc_engine_get_formula: {
       args: [
         FFIType.ptr, // handle
         FFIType.ptr, // weights (f64*)
@@ -80,31 +78,31 @@ function loadNativeSymbols(path: string) {
       ],
       returns: FFIType.u64,
     },
-    math_ml_hilbert_inner: {
+    ermc_hilbert_inner: {
       args: [FFIType.ptr, FFIType.ptr, FFIType.u64],
       returns: FFIType.f64,
     },
-    math_ml_hilbert_norm: {
+    ermc_hilbert_norm: {
       args: [FFIType.ptr, FFIType.u64],
       returns: FFIType.f64,
     },
-    math_ml_hilbert_distance: {
+    ermc_hilbert_distance: {
       args: [FFIType.ptr, FFIType.ptr, FFIType.u64],
       returns: FFIType.f64,
     },
-    math_ml_hilbert_angle: {
+    ermc_hilbert_angle: {
       args: [FFIType.ptr, FFIType.ptr, FFIType.u64],
       returns: FFIType.f64,
     },
-    math_ml_precision_sum: {
+    ermc_precision_sum: {
       args: [FFIType.ptr, FFIType.u64],
       returns: FFIType.f64,
     },
-    math_ml_precision_mean_var: {
+    ermc_precision_mean_var: {
       args: [FFIType.ptr, FFIType.u64, FFIType.ptr, FFIType.ptr],
       returns: FFIType.void,
     },
-    math_ml_outliers_hampel: {
+    ermc_outliers_hampel: {
       args: [
         FFIType.ptr, // data
         FFIType.u64, // n
@@ -114,7 +112,7 @@ function loadNativeSymbols(path: string) {
       ],
       returns: FFIType.u64,
     },
-    math_ml_svd: {
+    ermc_svd: {
       args: [
         FFIType.ptr, // matrix (f64*)
         FFIType.u64, // m
@@ -125,15 +123,15 @@ function loadNativeSymbols(path: string) {
       ],
       returns: FFIType.bool,
     },
-    math_ml_sequence_predict_next: {
+    ermc_sequence_predict_next: {
       args: [FFIType.ptr, FFIType.u64],
       returns: FFIType.f64,
     },
-    math_ml_dmd_dominant_frequency: {
+    ermc_dmd_dominant_frequency: {
       args: [FFIType.ptr, FFIType.u64, FFIType.u64, FFIType.f64],
       returns: FFIType.f64,
     },
-    math_ml_chaos_lorenz: {
+    ermc_chaos_lorenz: {
       args: [
         FFIType.f64,
         FFIType.f64,

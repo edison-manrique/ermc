@@ -5,9 +5,9 @@
 
 const std = @import("std");
 const testing = std.testing;
-const math_ml = @import("math-ml");
+const ermc = @import("ermc");
 
-const SequenceAi = math_ml.SequenceAi;
+const SequenceAi = ermc.SequenceAi;
 
 // ===========================================================================
 // SERIES: SEQUENCE AI
