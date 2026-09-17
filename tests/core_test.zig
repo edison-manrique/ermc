@@ -10,6 +10,41 @@ const ermc = @import("ermc");
 const OmniRng = ermc.core.rng.OmniRng;
 const simd = ermc.core.simd;
 const precision = ermc.core.precision;
+const FastArena = ermc.core.FastArena;
+
+test "Core: FastArena reuses blocks and supports std containers" {
+    var arena = FastArena.init(testing.allocator, .{ .initial_block_size = 64, .max_block_size = 256 });
+    defer arena.deinit();
+
+    const alloc = arena.allocator();
+    var values: std.ArrayList(u32) = .empty;
+    defer values.deinit(alloc);
+    for (0..100) |i| try values.append(alloc, @intCast(i));
+    try testing.expectEqual(@as(usize, 100), values.items.len);
+
+    const before = arena.stats();
+    try testing.expect(before.blocks > 1);
+    arena.reset();
+    const after_reset = arena.stats();
+    try testing.expectEqual(@as(usize, 0), after_reset.used);
+
+    const aligned = try alloc.alignedAlloc(u8, .@"64", 8);
+    try testing.expectEqual(@as(usize, 0), @intFromPtr(aligned.ptr) % 64);
+    try testing.expectEqual(before.blocks, arena.stats().blocks);
+}
+
+test "Core: FastArena reallocates the latest allocation in place" {
+    var arena = FastArena.init(testing.allocator, .{ .initial_block_size = 256 });
+    defer arena.deinit();
+    const alloc = arena.allocator();
+
+    var bytes = try alloc.alloc(u8, 16);
+    @memset(bytes, 0xA5);
+    const original = bytes.ptr;
+    bytes = try alloc.realloc(bytes, 64);
+    try testing.expectEqual(original, bytes.ptr);
+    for (bytes[0..16]) |byte| try testing.expectEqual(@as(u8, 0xA5), byte);
+}
 
 // ===========================================================================
 // CORE: RNG

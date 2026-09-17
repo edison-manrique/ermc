@@ -8,6 +8,7 @@
 //! v2: Métricas, Integrador ODE, IRLS integrado, optimizaciones SIMD y Gram unificada.
 
 pub const core = struct {
+    pub const arena = @import("core/arena.zig");
     pub const types = @import("core/types.zig");
     pub const rng = @import("core/rng.zig");
     pub const simd = @import("core/simd.zig");
@@ -18,6 +19,7 @@ pub const core = struct {
     pub const SolveOptions = types.SolveOptions;
     pub const MathMlError = types.MathMlError;
     pub const OmniRng = rng.OmniRng;
+    pub const FastArena = arena.FastArena;
 
     // Aritmética Compensada v3
     pub const neumaierSum = precision.neumaierSum;
@@ -233,5 +235,3 @@ pub const EllipticCurve = geometry.EllipticCurve;
 pub const GlvEndomorphism = geometry.GlvEndomorphism;
 pub const modInverse = modular.modInverse;
 pub const modPow = modular.modPow;
-
-
